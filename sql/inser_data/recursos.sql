@@ -45,7 +45,10 @@ VALUES ('9012345678901', 'Ibuprofeno 600mg', 'Medicamento', 15.00, 30.00);
 -- Recurso 10: Omeprazol (NÃO produzido por laboratório)
 INSERT INTO recurso (registro_ms, nome, tipo, temp_min, temp_max)
 VALUES ('0123456789012', 'Omeprazol 20mg', 'Medicamento', 15.00, 25.00);
-
+-- Adicione um medicamento do
+INSERT INTO recurso (registro_ms, nome, tipo, temp_min, temp_max)
+VALUES ('1122334455667', 'Losartana Potássica 50mg', 'Medicamento', 15.00, 30.00);
+COMMIT;
 
 -- ========================================
 -- PRODUÇÃO - Laboratórios produzem recursos (8 recursos)

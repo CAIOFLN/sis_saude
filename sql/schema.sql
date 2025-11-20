@@ -13,12 +13,8 @@ CREATE TABLE pessoa (
 
     CONSTRAINT pk_pessoa PRIMARY KEY (id_pessoa),
     CONSTRAINT sk_pessoa_cpf UNIQUE (cpf),
-    CONSTRAINT check_pessoa_cpf CHECK (cpf ~ '^[0-9]{11}$'), -- DUVIDA (o ~ esta certo ?)
+    CONSTRAINT check_pessoa_cpf CHECK (cpf ~ '^[0-9]{11}$')
 
-    CONSTRAINT check_pessoa_nome CHECK ( -- vale a pena adicionar isso para nao tratar em aplicação ?? ACHO QUE SIM 
-        trim(nome) <> '' AND
-        nome ~ '^[A-Za-zÁÉÍÓÚÀÈÌÒÙÂÊÎÔÛÃÕÇáéíóúàèìòùâêîôûãõç ]+$'
-    )
 );
 
 CREATE TABLE tipo_pessoa (
@@ -27,7 +23,7 @@ CREATE TABLE tipo_pessoa (
 
     CONSTRAINT pk_tipo_pessoa PRIMARY KEY (id_pessoa, tipo),
     CONSTRAINT fk_tipo_pessoa_pessoa
-        FOREIGN KEY (id_pessoa) REFERENCES pessoa(id_pessoa) ON DELETE CASCADE,
+        FOREIGN KEY (id_pessoa) REFERENCES pessoa(id_pessoa),
     CONSTRAINT check_tipo_pessoa
         CHECK (tipo IN ('PACIENTE', 'TRABALHADOR_ES', 'DIRETOR', 'GESTOR'))
 );
@@ -37,17 +33,17 @@ CREATE TABLE paciente (
 
     CONSTRAINT pk_paciente PRIMARY KEY (id_pessoa),
     CONSTRAINT fk_paciente_pessoa
-        FOREIGN KEY (id_pessoa) REFERENCES pessoa(id_pessoa) ON DELETE CASCADE
+        FOREIGN KEY (id_pessoa) REFERENCES pessoa(id_pessoa)
 );
 
 CREATE TABLE trabalhador_es (
     id_pessoa            INTEGER    NOT NULL,
-    funcao_trabalhador   VARCHAR(10) NOT NULL,          -- 'MEDICO' ou 'ENFERMEIRO'
+    funcao_trabalhador   VARCHAR(10) NOT NULL,          -- 'MEDICO' ou 'ENFERMEIRO' 
     registro_profissional VARCHAR(9) NOT NULL,          -- COREM CRM
 
     CONSTRAINT pk_trabalhador_es PRIMARY KEY (id_pessoa),
     CONSTRAINT fk_trabalhador_es_pessoa
-        FOREIGN KEY (id_pessoa) REFERENCES pessoa(id_pessoa) ON DELETE CASCADE,
+        FOREIGN KEY (id_pessoa) REFERENCES pessoa(id_pessoa),
     CONSTRAINT sk_trabalhador_es_registro_funcao
         UNIQUE (registro_profissional, funcao_trabalhador),
     CONSTRAINT check_trabalhador_es_funcao
@@ -63,7 +59,7 @@ CREATE TABLE gestor_sistema (
 
     CONSTRAINT pk_gestor_sistema PRIMARY KEY (id_pessoa),
     CONSTRAINT fk_gestor_sistema_pessoa
-        FOREIGN KEY (id_pessoa) REFERENCES pessoa(id_pessoa) ON DELETE CASCADE
+        FOREIGN KEY (id_pessoa) REFERENCES pessoa(id_pessoa)
 );
 
 
@@ -96,6 +92,8 @@ CREATE TABLE laboratorio (
     cnes_laboratorio CHAR(7) NOT NULL,
 
     CONSTRAINT pk_laboratorio PRIMARY KEY (cnes_laboratorio),
+    -- Caso a es do laboratorio seja excluida, nao precisamos armazenar o laboratorio pois ele nao possui
+    -- nenhum dado sensivel associado a ele, por isso ON DELETE CASCADE
     CONSTRAINT fk_laboratorio_entidade_saude
         FOREIGN KEY (cnes_laboratorio) REFERENCES entidade_saude(cnes) ON DELETE CASCADE
 );
@@ -107,7 +105,7 @@ CREATE TABLE hospital (
 
     CONSTRAINT pk_hospital PRIMARY KEY (cnes_hospital),
     CONSTRAINT fk_hospital_entidade_saude
-        FOREIGN KEY (cnes_hospital) REFERENCES entidade_saude(cnes) ON DELETE CASCADE,
+        FOREIGN KEY (cnes_hospital) REFERENCES entidade_saude(cnes),
     CONSTRAINT check_hospital_leitos_normais
         CHECK (leitos_normais_disp >= 0),
     CONSTRAINT check_hospital_leitos_uti
@@ -119,8 +117,10 @@ CREATE TABLE especializacoes (
     especialidade VARCHAR(20) NOT NULL,
 
     CONSTRAINT pk_especializacoes PRIMARY KEY (cnes_hospital, especialidade),
+    -- caso o hospital seja excluido podemos excluir suas especialidades pois nao tem 
+    -- nenhum dado sensivel associado a isso
     CONSTRAINT fk_especializacoes_hospital
-        FOREIGN KEY (cnes_hospital) REFERENCES hospital(cnes_hospital)
+        FOREIGN KEY (cnes_hospital) REFERENCES hospital(cnes_hospital) ON DELETE CASCADE
 );
 
 -------------------------------
@@ -134,8 +134,10 @@ CREATE TABLE diretor (
     CONSTRAINT pk_diretor PRIMARY KEY (id_pessoa),
 
     CONSTRAINT fk_diretor_pessoa
-        FOREIGN KEY (id_pessoa) REFERENCES pessoa(id_pessoa) ON DELETE CASCADE,
+        FOREIGN KEY (id_pessoa) REFERENCES pessoa(id_pessoa),
 
+    -- note que caso a entidade de saida for excluida, teremos uma inconsistencia 
+    -- nao podemos deixar set null e nem cascade pois diretor tem dados sensiveis associado a relatorio  de recurso
     CONSTRAINT fk_diretor_entidade_saude
         FOREIGN KEY (cnes_dirigido) REFERENCES entidade_saude(cnes)
 
@@ -156,9 +158,9 @@ CREATE TABLE recurso (
     CONSTRAINT check_recurso_registro_ms
         CHECK (registro_ms ~ '^[0-9]{13}$'),
     CONSTRAINT check_recurso_temp_min
-        CHECK (temp_min IS NULL OR (temp_min >= -100 AND temp_min <= 100)),
+        CHECK (temp_min IS NULL OR (temp_min >= -200 AND temp_min <= 200)),
     CONSTRAINT check_recurso_temp_max
-        CHECK (temp_max IS NULL OR (temp_max >= -100 AND temp_max <= 100)),
+        CHECK (temp_max IS NULL OR (temp_max >= -200 AND temp_max <= 200)),
     CONSTRAINT check_recurso_intervalo_temp
         CHECK (temp_min IS NULL OR temp_max IS NULL OR temp_min <= temp_max)
 );
@@ -166,9 +168,10 @@ CREATE TABLE recurso (
 CREATE TABLE possui (
     cnes_entidade_saude   CHAR(7)  NOT NULL,
     registro_ms_recurso   CHAR(13) NOT NULL,
-    quantidade_disponivel SMALLINT NOT NULL DEFAULT 0, -- SMAL INT é a melhor opção ?
+    quantidade_disponivel SMALLINT NOT NULL DEFAULT 0, 
 
     CONSTRAINT pk_possui PRIMARY KEY (cnes_entidade_saude, registro_ms_recurso),
+    -- podemos usar on delete cascade pois nao perdemos informacao sensivel
     CONSTRAINT fk_possui_entidade_saude
         FOREIGN KEY (cnes_entidade_saude) REFERENCES entidade_saude(cnes) ON DELETE CASCADE,
     CONSTRAINT fk_possui_recurso
@@ -182,6 +185,8 @@ CREATE TABLE produz (
     registro_ms_recurso CHAR(13) NOT NULL,
 
     CONSTRAINT pk_produz PRIMARY KEY (cnes_laboratorio, registro_ms_recurso),
+
+    -- podemos usar on delete cascade pois nao perdemos informacao sensivel
     CONSTRAINT fk_produz_laboratorio
         FOREIGN KEY (cnes_laboratorio) REFERENCES laboratorio(cnes_laboratorio) ON DELETE CASCADE,
     CONSTRAINT fk_produz_recurso
@@ -210,7 +215,10 @@ CREATE TABLE escala (
             'sexta-feira',
             'sabado',
             'domingo'
-        ))
+        )),
+    CONSTRAINT check_escala_intervalo_tempo
+        CHECK (tstz_saida > tstz_entrada)
+
 );
 
 CREATE TABLE turno (
@@ -227,7 +235,7 @@ CREATE TABLE turno (
         FOREIGN KEY (id_trabalhador_es) REFERENCES trabalhador_es(id_pessoa),
     CONSTRAINT fk_turno_entidade_saude
         FOREIGN KEY (cnes_entidade_saude) REFERENCES entidade_saude(cnes),
-    CONSTRAINT chk_turno_intervalo_tempo
+    CONSTRAINT check_turno_intervalo_tempo
         CHECK (tstz_saida IS NULL OR tstz_saida > tstz_entrada)
 );
 
@@ -364,9 +372,9 @@ CREATE TABLE transportadora (
     CONSTRAINT check_transportadora_telefone
         CHECK (telefone IS NULL OR telefone ~ '^\([0-9]{2}\)[0-9]{5}-[0-9]{4}$'),
     CONSTRAINT check_transportadora_temp_min
-        CHECK (temp_min_suportada IS NULL OR (temp_min_suportada >= -100 AND temp_min_suportada <= 100)),
+        CHECK (temp_min_suportada IS NULL OR (temp_min_suportada >= -200 AND temp_min_suportada <= 200)),
     CONSTRAINT check_transportadora_temp_max
-        CHECK (temp_max_suportada IS NULL OR (temp_max_suportada >= -100 AND temp_max_suportada <= 100)),
+        CHECK (temp_max_suportada IS NULL OR (temp_max_suportada >= 200 AND temp_max_suportada <= 200)),
     CONSTRAINT chkec_transportadora_intervalo_temp
         CHECK (temp_min_suportada IS NULL OR temp_max_suportada IS NULL OR temp_min_suportada <= temp_max_suportada)
 );
