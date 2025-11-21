@@ -83,7 +83,7 @@ VALUES
 -- Hospital Universitário UFSCar (2751501) possui:
 INSERT INTO possui (cnes_entidade_saude, registro_ms_recurso, quantidade_disponivel)
 VALUES 
-    ('2751501', '1234567890123', 150),  -- Vacina COVID-19
+    ('2751501', '1234567890123', 50),   -- Vacina COVID-19 (reduzido para criar deficit)
     ('2751501', '2345678901234', 300),  -- Dipirona
     ('2751501', '4567890123456', 250),  -- Paracetamol
     ('2751501', '5678901234567', 80),   -- Insulina
@@ -94,7 +94,7 @@ VALUES
 -- Santa Casa de São Carlos (2751502) possui:
 INSERT INTO possui (cnes_entidade_saude, registro_ms_recurso, quantidade_disponivel)
 VALUES 
-    ('2751502', '1234567890123', 200),  -- Vacina COVID-19
+    ('2751502', '1234567890123', 100),  -- Vacina COVID-19 (estoque próprio baixo)
     ('2751502', '3456789012345', 180),  -- Vacina Gripe
     ('2751502', '2345678901234', 450),  -- Dipirona
     ('2751502', '4567890123456', 380),  -- Paracetamol
@@ -106,7 +106,7 @@ VALUES
 -- Hospital São Paulo (2751503) possui:
 INSERT INTO possui (cnes_entidade_saude, registro_ms_recurso, quantidade_disponivel)
 VALUES 
-    ('2751503', '1234567890123', 120),  -- Vacina COVID-19
+    ('2751503', '1234567890123', 80),   -- Vacina COVID-19 (reduzido para criar deficit)
     ('2751503', '2345678901234', 280),  -- Dipirona
     ('2751503', '4567890123456', 200),  -- Paracetamol
     ('2751503', '5678901234567', 60),   -- Insulina
@@ -128,7 +128,7 @@ VALUES
 -- Laboratório Bio Análises (2751801) possui:
 INSERT INTO possui (cnes_entidade_saude, registro_ms_recurso, quantidade_disponivel)
 VALUES 
-    ('2751801', '1234567890123', 500),  -- Vacina COVID-19 (produz)
+    ('2751801', '1234567890123', 70),   -- Vacina COVID-19 (produz, mas estoque baixo)
     ('2751801', '5678901234567', 200),  -- Insulina (produz)
     ('2751801', '6789012345678', 300),  -- Vacina Hepatite B (produz)
     ('2751801', '9012345678901', 250),  -- Ibuprofeno (produz)

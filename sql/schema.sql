@@ -371,10 +371,6 @@ CREATE TABLE transportadora (
     CONSTRAINT pk_transportadora PRIMARY KEY (cnpj),
     CONSTRAINT check_transportadora_telefone
         CHECK (telefone IS NULL OR telefone ~ '^\([0-9]{2}\)[0-9]{5}-[0-9]{4}$'),
-    CONSTRAINT check_transportadora_temp_min
-        CHECK (temp_min_suportada IS NULL OR (temp_min_suportada >= -200 AND temp_min_suportada <= 200)),
-    CONSTRAINT check_transportadora_temp_max
-        CHECK (temp_max_suportada IS NULL OR (temp_max_suportada >= 200 AND temp_max_suportada <= 200)),
     CONSTRAINT chkec_transportadora_intervalo_temp
         CHECK (temp_min_suportada IS NULL OR temp_max_suportada IS NULL OR temp_min_suportada <= temp_max_suportada)
 );
