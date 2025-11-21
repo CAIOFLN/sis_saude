@@ -200,8 +200,8 @@ CREATE TABLE produz (
 CREATE TABLE escala (
     id_trabalhador_es INTEGER      NOT NULL,
     dia_da_semana     VARCHAR(13)  NOT NULL,
-    tstz_entrada      TIMESTAMPTZ  NOT NULL,
-    tstz_saida        TIMESTAMPTZ  NOT NULL,
+    tstz_entrada      TIME         NOT NULL,
+    tstz_saida        TIME         NOT NULL,
 
     CONSTRAINT pk_escala PRIMARY KEY (id_trabalhador_es, dia_da_semana, tstz_entrada),
     CONSTRAINT fk_escala_trabalhador_es
@@ -222,11 +222,11 @@ CREATE TABLE escala (
 );
 
 CREATE TABLE turno (
-    id_turno          UUID        DEFAULT gen_random_uuid() NOT NULL,
-    id_trabalhador_es INTEGER     NOT NULL,
-    cnes_entidade_saude CHAR(7)   NOT NULL,
-    tstz_entrada      TIMESTAMPTZ NOT NULL,
-    tstz_saida        TIMESTAMPTZ,
+    id_turno                UUID            DEFAULT gen_random_uuid() NOT NULL,
+    id_trabalhador_es       INTEGER         NOT NULL,
+    cnes_entidade_saude     CHAR(7)         NOT NULL,
+    tstz_entrada            TIMESTAMPTZ     NOT NULL,
+    tstz_saida              TIMESTAMPTZ,
 
     CONSTRAINT pk_turno PRIMARY KEY (id_turno),
     CONSTRAINT sk_turno_trabalhador_es_entidade_entrada
@@ -244,10 +244,10 @@ CREATE TABLE turno (
 ------------------------------------------------------------
 
 CREATE TABLE notificacao (
-    cnes_entidade_saude_notificada CHAR(7)   NOT NULL,
-    id_gestor_sistema              INTEGER   NOT NULL,
-    tstz_notificacao               TIMESTAMPTZ NOT NULL,
-    texto                          TEXT      NOT NULL,
+    cnes_entidade_saude_notificada      CHAR(7)         NOT NULL,
+    id_gestor_sistema                   INTEGER         NOT NULL,
+    tstz_notificacao                    TIMESTAMPTZ     NOT NULL,
+    texto                               TEXT            NOT NULL,
 
     CONSTRAINT pk_notificacao PRIMARY KEY (
         cnes_entidade_saude_notificada,
@@ -279,9 +279,9 @@ CREATE TABLE relatorio_caso (
 );
 
 CREATE TABLE encaminhamento (
-    id_relatorio_caso          UUID    NOT NULL,
-    cnes_hospital_destino      CHAR(7) NOT NULL,
-    id_gestor_sistema_responsavel INTEGER NOT NULL,
+    id_relatorio_caso               UUID        NOT NULL,
+    cnes_hospital_destino           CHAR(7)     NOT NULL,
+    id_gestor_sistema_responsavel   INTEGER     NOT NULL,
 
     CONSTRAINT pk_encaminhamento PRIMARY KEY (id_relatorio_caso),
     CONSTRAINT fk_encaminhamento_relatorio_caso
@@ -297,13 +297,13 @@ CREATE TABLE encaminhamento (
 ------------------------------------------------------------
 
 CREATE TABLE pedido (
-    id_pedido        UUID        DEFAULT gen_random_uuid() NOT NULL,
-    id_turno         UUID        NOT NULL,
-    registro_ms_recurso CHAR(13) NOT NULL,
-    tstz_pedido      TIMESTAMPTZ NOT NULL,
-    quantidade       SMALLINT    NOT NULL DEFAULT 1,
-    urgencia         VARCHAR(7)  NOT NULL DEFAULT 'BAIXA',  -- 'BAIXA', 'MEDIA', 'EXTREMA'
-    justificativa    TEXT,
+    id_pedido           UUID        DEFAULT gen_random_uuid() NOT NULL,
+    id_turno            UUID        NOT NULL,
+    registro_ms_recurso CHAR(13)    NOT NULL,
+    tstz_pedido         TIMESTAMPTZ NOT NULL,
+    quantidade          SMALLINT    NOT NULL DEFAULT 1,
+    urgencia            VARCHAR(7)  NOT NULL DEFAULT 'BAIXA',  -- 'BAIXA', 'MEDIA', 'EXTREMA'
+    justificativa       TEXT,
 
     CONSTRAINT pk_pedido PRIMARY KEY (id_pedido),
     CONSTRAINT sk_pedido_turno_recurso_tempo
@@ -319,11 +319,11 @@ CREATE TABLE pedido (
 );
 
 CREATE TABLE relatorio_recurso (
-    id_pedido_relatorio   UUID        NOT NULL,
-    id_diretor            INTEGER     NOT NULL,
-    tstz_relatorio_recurso TIMESTAMPTZ NOT NULL,
-    estado_relatorio      VARCHAR(9)  NOT NULL DEFAULT 'ANALISE', -- 'APROVADO', 'RECUSADO', 'ANALISE'
-    justificativa_decisao TEXT,
+    id_pedido_relatorio     UUID        NOT NULL,
+    id_diretor              INTEGER     NOT NULL,
+    tstz_relatorio_recurso  TIMESTAMPTZ NOT NULL,
+    estado_relatorio        VARCHAR(9)  NOT NULL DEFAULT 'ANALISE', -- 'APROVADO', 'RECUSADO', 'ANALISE'
+    justificativa_decisao   TEXT,
 
     CONSTRAINT pk_relatorio_recurso PRIMARY KEY (id_pedido_relatorio),
     CONSTRAINT fk_relatorio_recurso_pedido
@@ -331,7 +331,7 @@ CREATE TABLE relatorio_recurso (
     CONSTRAINT fk_relatorio_recurso_diretor
         FOREIGN KEY (id_diretor) REFERENCES diretor(id_pessoa),
     CONSTRAINT check_relatorio_recurso_estado
-        CHECK (estado_relatorio IN ('APROVADO', 'RECUSADO', 'ANALISE', 'FINALIZADA'))
+        CHECK (estado_relatorio IN ('APROVADO', 'RECUSADO', 'ANALISE'))
 );
 
 ------------------------------------------------------------
@@ -362,13 +362,14 @@ CREATE TABLE fornecimento (
 );
 
 CREATE TABLE transportadora (
-    cnpj              CHAR(14)     NOT NULL,
-    nome              VARCHAR(100) NOT NULL,
-    telefone          VARCHAR(15),
-    temp_min_suportada NUMERIC(5,2),
-    temp_max_suportada NUMERIC(5,2),
+    cnpj                CHAR(14)     NOT NULL,
+    nome                VARCHAR(100) NOT NULL,
+    telefone            VARCHAR(15),
+    temp_min_suportada  NUMERIC(5,2),
+    temp_max_suportada  NUMERIC(5,2),
 
     CONSTRAINT pk_transportadora PRIMARY KEY (cnpj),
+    CONSTRAINT check_transportadora_cnpj CHECK (cnpj ~ '^[0-9]{14}$'),
     CONSTRAINT check_transportadora_telefone
         CHECK (telefone IS NULL OR telefone ~ '^\([0-9]{2}\)[0-9]{5}-[0-9]{4}$'),
     CONSTRAINT chkec_transportadora_intervalo_temp
