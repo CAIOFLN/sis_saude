@@ -61,6 +61,7 @@ VALUES
     ('2751801', '5678901234567'),  -- Insulina
     ('2751801', '6789012345678'),  -- Vacina Hepatite B
     ('2751801', '9012345678901');  -- Ibuprofeno
+    
 
 -- Laboratório Fleury São Carlos (2751802) produz:
 INSERT INTO produz (cnes_laboratorio, registro_ms_recurso)

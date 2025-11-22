@@ -3,8 +3,6 @@
 ------------------------------------------------------------
 -- 1. PESSOA E ESPECIALIZACAO DE PESSOA
 ------------------------------------------------------------
--- DUVIDA (ON DELETE CASCADE ???)
--- DUVIDA 
 
 CREATE TABLE pessoa (
     id_pessoa  SERIAL      NOT NULL,
@@ -45,11 +43,11 @@ CREATE TABLE trabalhador_es (
     CONSTRAINT fk_trabalhador_es_pessoa
         FOREIGN KEY (id_pessoa) REFERENCES pessoa(id_pessoa),
     CONSTRAINT sk_trabalhador_es_registro_funcao
-        UNIQUE (registro_profissional, funcao_trabalhador),
+        UNIQUE (registro_profissional, funcao_trabalhador), -- EXPLICAR ISSO NO RELATORIO
     CONSTRAINT check_trabalhador_es_funcao
         CHECK (funcao_trabalhador IN ('MEDICO', 'ENFERMEIRO')),
     CONSTRAINT check_trabalhador_es_registro
-        CHECK (registro_profissional ~ '^[0-9]{4,6}-[A-Z]{2}$') -- DUVIDA !!
+        CHECK (registro_profissional ~ '^[0-9]{4,6}-[A-Z]{2}$') 
 );
 
 --- VOU ADICIONAR DIRETOR DEPOIS QUE CRIAR ENTIDADE DE SAUDE
@@ -198,12 +196,12 @@ CREATE TABLE produz (
 ------------------------------------------------------------
 
 CREATE TABLE escala (
-    id_trabalhador_es INTEGER      NOT NULL,
-    dia_da_semana     VARCHAR(13)  NOT NULL,
-    tstz_entrada      TIME         NOT NULL,
-    tstz_saida        TIME         NOT NULL,
+    id_trabalhador_es INTEGER     NOT NULL,
+    dia_da_semana     VARCHAR(13) NOT NULL,
+    hora_entrada      TIME        NOT NULL,  -- note que nao faz sentido considerar o fuso horario aqui, pois é o trabalhador que deve se adptar ao fuso da es
+    hora_saida        TIME        NOT NULL,
 
-    CONSTRAINT pk_escala PRIMARY KEY (id_trabalhador_es, dia_da_semana, tstz_entrada),
+    CONSTRAINT pk_escala PRIMARY KEY (id_trabalhador_es, dia_da_semana, hora_entrada),
     CONSTRAINT fk_escala_trabalhador_es
         FOREIGN KEY (id_trabalhador_es) REFERENCES trabalhador_es(id_pessoa) ON DELETE CASCADE,
     CONSTRAINT check_escala_dia_da_semana
@@ -217,9 +215,9 @@ CREATE TABLE escala (
             'domingo'
         )),
     CONSTRAINT check_escala_intervalo_tempo
-        CHECK (tstz_saida > tstz_entrada)
-
+        CHECK (hora_saida > hora_entrada)
 );
+
 
 CREATE TABLE turno (
     id_turno                UUID            DEFAULT gen_random_uuid() NOT NULL,

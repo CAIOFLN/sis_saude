@@ -7,96 +7,96 @@
 -- ========================================
 
 -- Médico Guilherme (CPF: 40420248282) - Segunda a Sexta
-INSERT INTO escala (id_trabalhador_es, dia_da_semana, tstz_entrada, tstz_saida)
-SELECT id_pessoa, 'segunda-feira', '2025-11-03 08:00:00-03', '2025-11-03 16:00:00-03'
+INSERT INTO escala (id_trabalhador_es, dia_da_semana, hora_entrada, hora_saida)
+SELECT id_pessoa, 'segunda-feira', '08:00:00', '16:00:00'
 FROM pessoa WHERE cpf = '40420248282';
 
-INSERT INTO escala (id_trabalhador_es, dia_da_semana, tstz_entrada, tstz_saida)
-SELECT id_pessoa, 'terca-feira', '2025-11-04 08:00:00-03', '2025-11-04 16:00:00-03'
+INSERT INTO escala (id_trabalhador_es, dia_da_semana, hora_entrada, hora_saida)
+SELECT id_pessoa, 'terca-feira', '08:00:00', '16:00:00'
 FROM pessoa WHERE cpf = '40420248282';
 
-INSERT INTO escala (id_trabalhador_es, dia_da_semana, tstz_entrada, tstz_saida)
-SELECT id_pessoa, 'quarta-feira', '2025-11-05 08:00:00-03', '2025-11-05 16:00:00-03'
+INSERT INTO escala (id_trabalhador_es, dia_da_semana, hora_entrada, hora_saida)
+SELECT id_pessoa, 'quarta-feira', '08:00:00', '16:00:00'
 FROM pessoa WHERE cpf = '40420248282';
 
-INSERT INTO escala (id_trabalhador_es, dia_da_semana, tstz_entrada, tstz_saida)
-SELECT id_pessoa, 'quinta-feira', '2025-11-06 08:00:00-03', '2025-11-06 16:00:00-03'
+INSERT INTO escala (id_trabalhador_es, dia_da_semana, hora_entrada, hora_saida)
+SELECT id_pessoa, 'quinta-feira', '08:00:00', '16:00:00'
 FROM pessoa WHERE cpf = '40420248282';
 
-INSERT INTO escala (id_trabalhador_es, dia_da_semana, tstz_entrada, tstz_saida)
-SELECT id_pessoa, 'sexta-feira', '2025-11-07 08:00:00-03', '2025-11-07 16:00:00-03'
+INSERT INTO escala (id_trabalhador_es, dia_da_semana, hora_entrada, hora_saida)
+SELECT id_pessoa, 'sexta-feira', '08:00:00', '16:00:00'
 FROM pessoa WHERE cpf = '40420248282';
 
 -- Médica Ana Beatriz (CPF: 12452364335) - Terça a Sábado
-INSERT INTO escala (id_trabalhador_es, dia_da_semana, tstz_entrada, tstz_saida)
-SELECT id_pessoa, 'terca-feira', '2025-11-04 14:00:00-03', '2025-11-04 22:00:00-03'
+INSERT INTO escala (id_trabalhador_es, dia_da_semana, hora_entrada, hora_saida)
+SELECT id_pessoa, 'terca-feira', '14:00:00', '22:00:00'
 FROM pessoa WHERE cpf = '12452364335';
 
-INSERT INTO escala (id_trabalhador_es, dia_da_semana, tstz_entrada, tstz_saida)
-SELECT id_pessoa, 'quarta-feira', '2025-11-05 14:00:00-03', '2025-11-05 22:00:00-03'
+INSERT INTO escala (id_trabalhador_es, dia_da_semana, hora_entrada, hora_saida)
+SELECT id_pessoa, 'quarta-feira', '14:00:00', '22:00:00'
 FROM pessoa WHERE cpf = '12452364335';
 
-INSERT INTO escala (id_trabalhador_es, dia_da_semana, tstz_entrada, tstz_saida)
-SELECT id_pessoa, 'quinta-feira', '2025-11-06 14:00:00-03', '2025-11-06 22:00:00-03'
+INSERT INTO escala (id_trabalhador_es, dia_da_semana, hora_entrada, hora_saida)
+SELECT id_pessoa, 'quinta-feira', '14:00:00', '22:00:00'
 FROM pessoa WHERE cpf = '12452364335';
 
-INSERT INTO escala (id_trabalhador_es, dia_da_semana, tstz_entrada, tstz_saida)
-SELECT id_pessoa, 'sexta-feira', '2025-11-07 14:00:00-03', '2025-11-07 22:00:00-03'
+INSERT INTO escala (id_trabalhador_es, dia_da_semana, hora_entrada, hora_saida)
+SELECT id_pessoa, 'sexta-feira', '14:00:00', '22:00:00'
 FROM pessoa WHERE cpf = '12452364335';
 
-INSERT INTO escala (id_trabalhador_es, dia_da_semana, tstz_entrada, tstz_saida)
-SELECT id_pessoa, 'sabado', '2025-11-08 14:00:00-03', '2025-11-08 22:00:00-03'
+INSERT INTO escala (id_trabalhador_es, dia_da_semana, hora_entrada, hora_saida)
+SELECT id_pessoa, 'sabado', '14:00:00', '22:00:00'
 FROM pessoa WHERE cpf = '12452364335';
 
 -- Médico Henrique (CPF: 23565323453) - Plantão 24h Sábado e Domingo
-INSERT INTO escala (id_trabalhador_es, dia_da_semana, tstz_entrada, tstz_saida)
-SELECT id_pessoa, 'sabado', '2025-11-08 08:00:00-03', '2025-11-09 08:00:00-03'
+INSERT INTO escala (id_trabalhador_es, dia_da_semana, hora_entrada, hora_saida)
+SELECT id_pessoa, 'sabado', '08:00:00', '08:00:00'
 FROM pessoa WHERE cpf = '23565323453';
 
-INSERT INTO escala (id_trabalhador_es, dia_da_semana, tstz_entrada, tstz_saida)
-SELECT id_pessoa, 'domingo', '2025-11-09 08:00:00-03', '2025-11-10 08:00:00-03'
+INSERT INTO escala (id_trabalhador_es, dia_da_semana, hora_entrada, hora_saida)
+SELECT id_pessoa, 'domingo', '08:00:00', '08:00:00'
 FROM pessoa WHERE cpf = '23565323453';
 
 -- Enfermeira Maria Clara (CPF: 34567891234) - Segunda a Sexta manhã
-INSERT INTO escala (id_trabalhador_es, dia_da_semana, tstz_entrada, tstz_saida)
-SELECT id_pessoa, 'segunda-feira', '2025-11-03 07:00:00-03', '2025-11-03 13:00:00-03'
+INSERT INTO escala (id_trabalhador_es, dia_da_semana, hora_entrada, hora_saida)
+SELECT id_pessoa, 'segunda-feira', '07:00:00', '13:00:00'
 FROM pessoa WHERE cpf = '34567891234';
 
-INSERT INTO escala (id_trabalhador_es, dia_da_semana, tstz_entrada, tstz_saida)
-SELECT id_pessoa, 'terca-feira', '2025-11-04 07:00:00-03', '2025-11-04 13:00:00-03'
+INSERT INTO escala (id_trabalhador_es, dia_da_semana, hora_entrada, hora_saida)
+SELECT id_pessoa, 'terca-feira', '07:00:00', '13:00:00'
 FROM pessoa WHERE cpf = '34567891234';
 
-INSERT INTO escala (id_trabalhador_es, dia_da_semana, tstz_entrada, tstz_saida)
-SELECT id_pessoa, 'quarta-feira', '2025-11-05 07:00:00-03', '2025-11-05 13:00:00-03'
+INSERT INTO escala (id_trabalhador_es, dia_da_semana, hora_entrada, hora_saida)
+SELECT id_pessoa, 'quarta-feira', '07:00:00', '13:00:00'
 FROM pessoa WHERE cpf = '34567891234';
 
-INSERT INTO escala (id_trabalhador_es, dia_da_semana, tstz_entrada, tstz_saida)
-SELECT id_pessoa, 'quinta-feira', '2025-11-06 07:00:00-03', '2025-11-06 13:00:00-03'
+INSERT INTO escala (id_trabalhador_es, dia_da_semana, hora_entrada, hora_saida)
+SELECT id_pessoa, 'quinta-feira', '07:00:00', '13:00:00'
 FROM pessoa WHERE cpf = '34567891234';
 
-INSERT INTO escala (id_trabalhador_es, dia_da_semana, tstz_entrada, tstz_saida)
-SELECT id_pessoa, 'sexta-feira', '2025-11-07 07:00:00-03', '2025-11-07 13:00:00-03'
+INSERT INTO escala (id_trabalhador_es, dia_da_semana, hora_entrada, hora_saida)
+SELECT id_pessoa, 'sexta-feira', '07:00:00', '13:00:00'
 FROM pessoa WHERE cpf = '34567891234';
 
 -- Enfermeiro João Pedro (CPF: 45678912345) - Segunda a Sexta tarde
-INSERT INTO escala (id_trabalhador_es, dia_da_semana, tstz_entrada, tstz_saida)
-SELECT id_pessoa, 'segunda-feira', '2025-11-03 13:00:00-03', '2025-11-03 19:00:00-03'
+INSERT INTO escala (id_trabalhador_es, dia_da_semana, hora_entrada, hora_saida)
+SELECT id_pessoa, 'segunda-feira', '13:00:00', '19:00:00'
 FROM pessoa WHERE cpf = '45678912345';
 
-INSERT INTO escala (id_trabalhador_es, dia_da_semana, tstz_entrada, tstz_saida)
-SELECT id_pessoa, 'terca-feira', '2025-11-04 13:00:00-03', '2025-11-04 19:00:00-03'
+INSERT INTO escala (id_trabalhador_es, dia_da_semana, hora_entrada, hora_saida)
+SELECT id_pessoa, 'terca-feira', '13:00:00', '19:00:00'
 FROM pessoa WHERE cpf = '45678912345';
 
-INSERT INTO escala (id_trabalhador_es, dia_da_semana, tstz_entrada, tstz_saida)
-SELECT id_pessoa, 'quarta-feira', '2025-11-05 13:00:00-03', '2025-11-05 19:00:00-03'
+INSERT INTO escala (id_trabalhador_es, dia_da_semana, hora_entrada, hora_saida)
+SELECT id_pessoa, 'quarta-feira', '13:00:00', '19:00:00'
 FROM pessoa WHERE cpf = '45678912345';
 
-INSERT INTO escala (id_trabalhador_es, dia_da_semana, tstz_entrada, tstz_saida)
-SELECT id_pessoa, 'quinta-feira', '2025-11-06 13:00:00-03', '2025-11-06 19:00:00-03'
+INSERT INTO escala (id_trabalhador_es, dia_da_semana, hora_entrada, hora_saida)
+SELECT id_pessoa, 'quinta-feira', '13:00:00', '19:00:00'
 FROM pessoa WHERE cpf = '45678912345';
 
-INSERT INTO escala (id_trabalhador_es, dia_da_semana, tstz_entrada, tstz_saida)
-SELECT id_pessoa, 'sexta-feira', '2025-11-07 13:00:00-03', '2025-11-07 19:00:00-03'
+INSERT INTO escala (id_trabalhador_es, dia_da_semana, hora_entrada, hora_saida)
+SELECT id_pessoa, 'sexta-feira', '13:00:00', '19:00:00'
 FROM pessoa WHERE cpf = '45678912345';
 
 

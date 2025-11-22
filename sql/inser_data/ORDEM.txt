@@ -1,7 +1,0 @@
-entidades_saude.sql
-pessoas.sql
-recursos.sql
-notificacoes.sql
-turnos_escalas.sql
-pedidos_requisicoes.sql
-relatorio_casos.sql

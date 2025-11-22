@@ -23,7 +23,7 @@ WITH ped AS (
         '2025-11-21 10:00:00-03',
         9890,
         'EXTREMA',
-        'Governo Estadual designou hospital como polo regional de vacinação para 15 municípios. Campanha de imunização em massa contra nova variante do COVID-19. Necessário estoque para atender população estimada de 350 mil pessoas. Prazo: 20 dias.'
+        'Solicitação de 9.890 doses para campanha massiva. Pedido aguarda análise da diretoria devido ao volume excepcionalmente alto e necessidade de validação orçamentária.'
     FROM turno t
     JOIN pessoa p ON t.id_trabalhador_es = p.id_pessoa
     WHERE p.cpf = '23565323453' 
@@ -58,7 +58,7 @@ WITH ped AS (
         '2025-11-22 09:30:00-03',
         9999,
         'EXTREMA',
-        'Surto de intoxicação alimentar em massa em 5 cidades. Hospital referência para hidratação venosa. Previsão de 4.000 atendimentos em 15 dias. Protocolo da Vigilância Sanitária.'
+        'Requisição de 9.999 unidades para atendimento de emergência. Aguarda análise técnica da disponibilidade no sistema e confirmação epidemiológica.'
     FROM turno t
     JOIN pessoa p ON t.id_trabalhador_es = p.id_pessoa
     WHERE p.cpf = '40420248282' 
@@ -93,7 +93,7 @@ WITH ped AS (
         '2025-11-22 16:00:00-03',
         8040,
         'MEDIA',
-        'Contrato com Secretaria Municipal para centralização de distribuição. Hospital será centro logístico para 45 UBS por 4 meses. Sistema municipal unificado.'
+        'Pedido de 8.040 comprimidos para distribuição municipal. Aguarda validação do contrato e análise de risco de vencimento devido ao volume.'
     FROM turno t
     JOIN pessoa p ON t.id_trabalhador_es = p.id_pessoa
     WHERE p.cpf = '12452364335' 
@@ -128,7 +128,7 @@ WITH ped AS (
         '2025-11-23 10:00:00-03',
         9870,
         'EXTREMA',
-        'Programa Estadual de Diabetes - Fase 2. Centro de distribuição para 25 municípios. Cadastro de 12.000 pacientes insulinodependentes. Fornecimento trimestral - Lei 15.789/2025.'
+        'Solicitação de 9.870 frascos para programa estadual. Aguarda verificação de capacidade de armazenamento refrigerado e parecer jurídico.'
     FROM turno t
     JOIN pessoa p ON t.id_trabalhador_es = p.id_pessoa
     WHERE p.cpf = '60616263646' 
@@ -163,7 +163,7 @@ WITH ped AS (
         '2025-11-23 11:00:00-03',
         9703,
         'EXTREMA',
-        'Epidemia de dengue em 8 municípios. Hospital referência estadual. Projeção de 8.000 casos em 60 dias. Estoque estratégico - protocolo do Ministério da Saúde.'
+        'Requisição de 9.703 comprimidos para estoque estratégico. Aguarda confirmação de declaração de epidemia e coordenação com o Ministério da Saúde.'
     FROM turno t
     JOIN pessoa p ON t.id_trabalhador_es = p.id_pessoa
     WHERE p.cpf = '23565323453' 
