@@ -61,6 +61,23 @@ WHERE P.quantidade > EXT.ESTOQUE_EXTERNO;
 
 
 
+-- Consulta 3.
+-- Recursos que são produzidos por laboratorios mas nenhum hospital tem em estoque
+
+WITH recursos_faltantes AS (
+    SELECT registro_ms_recurso
+    FROM produz
+    EXCEPT
+    SELECT p.registro_ms_recurso
+    FROM hospital h 
+    JOIN possui p ON h.cnes_hospital = p.cnes_entidade_saude
+    WHERE p.quantidade_disponivel > 0
+)
+SELECT r.registro_ms, r.nome, r.tipo
+FROM recursos_faltantes rf 
+JOIN recurso r ON rf.registro_ms_recurso = r.registro_ms;
+
+
 
 
 
