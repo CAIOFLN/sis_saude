@@ -1,17 +1,16 @@
 -- CONSULTA 1
 -- Para todos recursos, selecionar os recursos de hospitais que estão abaixo da média
 -- Quando o hospital nao ter o recurso (NULL) essa funcao coloca 0 no lugar "COALESCE(p.quantidade_disponivel, 0)"
-
 SELECT h.cnes_hospital, r.registro_ms, r.nome, COALESCE(p.quantidade_disponivel, 0) AS qtd_hospital, media.avg_estoque, media.maior_estoque, media.menor_estoque
 FROM hospital h 
 CROSS JOIN recurso r -- produto cartesiano para considerar todo os produtos possiveis
 LEFT JOIN possui p ON (p.cnes_entidade_saude = h.cnes_hospital AND p.registro_ms_recurso = r.registro_ms)
 JOIN ( -- podemos fazer join pois devido ao CROSS JOIN ja temos todas as combinacoes possivel
-    SELECT r.registro_ms, AVG(COALESCE(p.quantidade_disponivel, 0)) as avg_estoque, MIN(COALESCE(p.quantidade_disponivel, 0)) as menor_estoque,
-    MAX(COALESCE(p.quantidade_disponivel, 0)) as maior_estoque -- quando nao tem estoque considera 0
-    FROM hospital h JOIN possui p ON h.cnes_hospital = p.cnes_entidade_saude -- considera apenas hospitais para fazer a conta
-    RIGHT JOIN recurso r ON r.registro_ms = p.registro_ms_recurso -- produtos que nao tem estoque deve ser considerado
-    GROUP BY (r.registro_ms)
+    SELECT r2.registro_ms, AVG(COALESCE(p2.quantidade_disponivel, 0)) as avg_estoque, MIN(COALESCE(p2.quantidade_disponivel, 0)) as menor_estoque,
+    MAX(COALESCE(p2.quantidade_disponivel, 0)) as maior_estoque -- quando nao tem estoque considera 0
+    FROM hospital h2 JOIN possui p2 ON h2.cnes_hospital = p2.cnes_entidade_saude -- considera apenas hospitais para fazer a conta
+    RIGHT JOIN recurso r2 ON r2.registro_ms = p2.registro_ms_recurso -- produtos que nao tem estoque deve ser considerado
+    GROUP BY (r2.registro_ms)
 ) media ON media.registro_ms = r.registro_ms
 WHERE (COALESCE(p.quantidade_disponivel, 0) < media.avg_estoque or COALESCE(p.quantidade_disponivel, 0) = 0)
 ORDER BY h.cnes_hospital;
@@ -21,7 +20,7 @@ ORDER BY h.cnes_hospital;
 --Consulta 2
 
 -- Versão 1 (Feita pelo Avatas)
-/*SELECT r.id_pedido_relatorio AS id_pedido, r.justificativa_decisao AS parecer_diretor, es.nome, p.quantidade, p.urgencia
+SELECT r.id_pedido_relatorio AS id_pedido, r.justificativa_decisao AS parecer_diretor, es.nome, p.quantidade, p.urgencia
 FROM relatorio_recurso r JOIN pedido p ON r.id_pedido_relatorio = p.id_pedido
     JOIN turno t ON p.id_turno = t.id_turno
     JOIN entidade_saude es ON t.cnes_entidade_saude = es.cnes
@@ -31,7 +30,7 @@ WHERE (r.estado_relatorio = 'ANALISE' AND  p.quantidade > (
     JOIN recurso r2 ON p2.registro_ms_recurso = r2.registro_ms
     WHERE (es2.cnes <> es.cnes AND r2.registro_ms = p.registro_ms_recurso)
 ));
-
+/*
 -- Versão 2 (Mais performance em comparação à 3 porém menos informações)
 SELECT P.id_pedido, R.nome, R.registro_ms, P.quantidade -- Pode retornar somente com o ID do recurso para evitar uma junção adicional
     FROM PEDIDO P
@@ -80,6 +79,14 @@ JOIN recurso r ON rf.registro_ms_recurso = r.registro_ms;
 
 
 
+-- Consulta 4.
+-- 
+SELECT * FROM transportadora
+    WHERE temp_min_suportada <= 
+    (SELECT MIN(temp_min) FROM RECURSO) AND
+    temp_max_suportada >=
+    (SELECT MAX(temp_max) FROM RECURSO);
+
 
 -- Consulta 5.
 -- Dado um hospital, nesse caso cnes = 2751503, devemos verificar todos os relatorio de recurso que estão em analise
@@ -97,3 +104,19 @@ FROM produz
 WHERE registro_ms_recurso IN (SELECT * FROM recursos_requisitados)
 GROUP BY cnes_laboratorio
 HAVING COUNT(*) = (SELECT COUNT(*) FROM recursos_requisitados);
+
+
+
+WITH menos_frequentes AS (
+    SELECT especialidade
+    FROM especializacoes
+    GROUP BY especialidade
+    ORDER BY COUNT(*) ASC
+    LIMIT 3
+)
+SELECT h.*
+FROM hospital AS h
+JOIN especializacoes AS e ON h.cnes_hospital = e.cnes_hospital
+WHERE e.especialidade IN (SELECT especialidade FROM menos_frequentes)
+GROUP BY h.cnes_hospital
+HAVING COUNT(DISTINCT e.especialidade) >= 2;
