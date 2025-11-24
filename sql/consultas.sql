@@ -1,4 +1,4 @@
--- CONSULTA 1
+-- Consulta 1
 -- Para todos recursos, selecionar os recursos de hospitais que estão abaixo da média
 -- Quando o hospital nao ter o recurso (NULL) essa funcao coloca 0 no lugar "COALESCE(p.quantidade_disponivel, 0)"
 SELECT h.cnes_hospital, r.registro_ms, r.nome, COALESCE(p.quantidade_disponivel, 0) AS qtd_hospital, media.avg_estoque, media.maior_estoque, media.menor_estoque
@@ -17,46 +17,22 @@ ORDER BY h.cnes_hospital;
 
 -- Não criei casos especificos pois os dados padroes ja geram uma boa querry
 
---Consulta 2
-
--- Versão 1 (Feita pelo Avatas)
-SELECT r.id_pedido_relatorio AS id_pedido, r.justificativa_decisao AS parecer_diretor, es.nome, p.quantidade, p.urgencia
-FROM relatorio_recurso r JOIN pedido p ON r.id_pedido_relatorio = p.id_pedido
-    JOIN turno t ON p.id_turno = t.id_turno
-    JOIN entidade_saude es ON t.cnes_entidade_saude = es.cnes
-WHERE (r.estado_relatorio = 'ANALISE' AND  p.quantidade > (
-    SELECT SUM(p2.quantidade_disponivel) AS qtd_disponivel
-    FROM entidade_saude es2 JOIN possui p2 on es2.cnes = p2.cnes_entidade_saude
-    JOIN recurso r2 ON p2.registro_ms_recurso = r2.registro_ms
-    WHERE (es2.cnes <> es.cnes AND r2.registro_ms = p.registro_ms_recurso)
-));
-/*
--- Versão 2 (Mais performance em comparação à 3 porém menos informações)
-SELECT P.id_pedido, R.nome, R.registro_ms, P.quantidade -- Pode retornar somente com o ID do recurso para evitar uma junção adicional
-    FROM PEDIDO P
-    JOIN turno T ON P.id_turno = T.id_turno 
-    JOIN entidade_saude ES ON ES.cnes = T.cnes_entidade_saude
-    JOIN recurso R ON R.registro_ms = P.registro_ms_recurso -- Linha opcional caso deseja-se listar também qual o nome do recurso em falta.
-WHERE P.quantidade > (
-    SELECT SUM(PO.quantidade_disponivel) as ESTOQUE_EXTERNO FROM possui PO 
-    JOIN entidade_saude ES2 ON PO.cnes_entidade_saude = ES2.cnes
-    WHERE ES2.cnes <> ES.cnes AND PO.registro_ms_recurso = P.registro_ms_recurso
-    GROUP BY PO.registro_ms_recurso);
-*/
-
--- Versão 3 (Menos performance porém bem mais explicativo e útil)
-SELECT P.id_pedido, R.nome, R.registro_ms, P.quantidade, EXT.ESTOQUE_EXTERNO, (EXT.ESTOQUE_EXTERNO - P.quantidade) AS FALTA
-    FROM PEDIDO P
+-- Consulta 2
+/* Pesquisar pelos pedidos sob análise que requisitarem por uma quantia de um determinado recurso acima da disponível no estoque total
+e exibir o pedido, o recurso, o estoque externo total e a quantia em falta daquele recurso. */
+SELECT P.id_pedido, R.nome, R.registro_ms, P.quantidade, EXT.ESTOQUE_EXTERNO, (EXT.ESTOQUE_EXTERNO - P.quantidade) AS EM_FALTA -- Calcula-se a falta como a diferença da quantia pedida e do estoque externo.
+    FROM relatorio_recurso RR
+    JOIN pedido P ON P.id_pedido = RR.id_pedido_relatorio
     JOIN turno T ON P.id_turno = T.id_turno 
     JOIN entidade_saude ES ON ES.cnes = T.cnes_entidade_saude
     JOIN recurso R ON R.registro_ms = P.registro_ms_recurso 
 JOIN LATERAL(
-    SELECT SUM(PO.quantidade_disponivel) as ESTOQUE_EXTERNO 
+    SELECT SUM(PO.quantidade_disponivel) as ESTOQUE_EXTERNO -- Soma de todas as quantias para cada recurso.
     FROM possui PO 
     JOIN entidade_saude ES2 ON PO.cnes_entidade_saude = ES2.cnes
-    WHERE ES2.cnes <> ES.cnes AND PO.registro_ms_recurso = P.registro_ms_recurso
-    GROUP BY PO.registro_ms_recurso) AS EXT ON TRUE
-WHERE P.quantidade > EXT.ESTOQUE_EXTERNO;
+    WHERE ES2.cnes <> ES.cnes AND PO.registro_ms_recurso = P.registro_ms_recurso) -- É necessário filtrar a entidade de saúde que fez o pedido da soma de recurso.
+    AS EXT ON TRUE
+WHERE P.quantidade > EXT.ESTOQUE_EXTERNO AND RR.estado_relatorio = 'ANALISE'; -- Exibe-se somente os pedidos em análise e que atendam à condição proposta.
 
 
 
@@ -119,4 +95,4 @@ FROM hospital AS h
 JOIN especializacoes AS e ON h.cnes_hospital = e.cnes_hospital
 WHERE e.especialidade IN (SELECT especialidade FROM menos_frequentes)
 GROUP BY h.cnes_hospital
-HAVING COUNT(DISTINCT e.especialidade) >= 2;
+HAVING COUNT(DISTINCT e.especialidade) >= 3;
