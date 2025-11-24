@@ -1,6 +1,7 @@
 from database import DatabaseConnection
 from trabalhador_service import TrabalhadorService
 from pedido_service import PedidoService
+from paciente_service import PacienteService
 import re
 
 class SistemaSaude:    
@@ -8,6 +9,7 @@ class SistemaSaude:
         self.db = DatabaseConnection()
         self.trabalhador_service = TrabalhadorService(self.db)
         self.pedido_service = PedidoService(self.db)
+        self.paciente_service = PacienteService(self.db)
         self.trabalhador_atual = None
         self.turno_atual = None
     
@@ -34,27 +36,29 @@ class SistemaSaude:
         print("PASSO 1: AUTENTICAÇÃO")
         print("=" * 60)
         
-        print("\nQual sua função?")
-        print("1 - Médico")
-        print("2 - Enfermeiro")
+        while True:
+            print("\nQual sua função?")
+            print("1 - Médico")
+            print("2 - Enfermeiro")
+            print("0 - Sair")
+            
+            opcao = input("\nEscolha uma opção: ").strip()
+            
+            if opcao == '1':
+                funcao = 'MEDICO'
+                tipo_registro = "CRM"
+                break
+            elif opcao == '2':
+                funcao = 'ENFERMEIRO'
+                tipo_registro = "COREN"
+                break
+            elif opcao == '0':
+                print("\nAplicação encerrada.")
+                return False
+            else:
+                print("Opção inválida! Tente novamente.")
         
-        opcao = input("\nEscolha (1 ou 2): ").strip()
-        
-        if opcao == '1':
-            funcao = 'MEDICO'
-            tipo_registro = "CRM"
-        elif opcao == '2':
-            funcao = 'ENFERMEIRO'
-            tipo_registro = "COREN"
-        else:
-            print("✗ Opção inválida!")
-            return False
-        
-        registro = input(f"\nDigite seu {tipo_registro} (formato: 123456-UF): ").strip()
-        registro_regex = r'^[0-9]{4,6}-[A-Z]{2}$'
-        if not re.match(registro_regex, registro):
-            print("Formato de registro inválido! - SQL INJECTION PREVENTED")
-            return False
+        registro = input(f"\nDigite seu {tipo_registro}: ").strip()
         
         trabalhador = self.trabalhador_service.buscar_trabalhador(funcao, registro)
         if trabalhador:
@@ -65,20 +69,17 @@ class SistemaSaude:
                 'funcao': trabalhador[3],
                 'registro': trabalhador[4]
             }
-            print(f"\n Bem-vindo(a), {self.trabalhador_atual['nome']}!")
-            print(f"  CPF: {self.trabalhador_atual['cpf']}")
-            print(f"  {tipo_registro}: {self.trabalhador_atual['registro']}")
+            print(f"\nBem-vindo(a), {self.trabalhador_atual['nome']}!")
             return True
         else:
-            print(f"\n{funcao} com {tipo_registro} {registro} não encontrado(a) no sistema.")
-            print("Aplicação encerrada.")
+            print("\nRegistro não encontrado no sistema.")
             return False
     
     def passo2_verificar_turno(self):
         """
         PASSO 2: Verifica se tem turno ativo.
-        Se sim: opção de finalizar turno ou fazer pedido.
-        Se não: opção de iniciar turno.
+        Se não tem: opção de iniciar turno ou sair.
+        Se tem: direciona para o fluxo específico (médico ou enfermeiro).
         """
         print("\n" + "=" * 60)
         print("PASSO 2: VERIFICAÇÃO DE TURNO")
@@ -87,28 +88,61 @@ class SistemaSaude:
         turno = self.trabalhador_service.verificar_turno_ativo(self.trabalhador_atual['id'])
         
         if turno:
-            # Tem turno ativo
+            # Tem turno ativo - direciona para fluxo específico
             self.turno_atual = {
                 'id': str(turno[0]),
                 'cnes': turno[1],
                 'entrada': turno[2],
                 'nome_entidade': turno[3]
             }
-            print(f"\n Você possui um turno ATIVO:")
-            print(f"  Entidade: {self.turno_atual['nome_entidade']} (CNES: {self.turno_atual['cnes']})")
-            print(f"  Entrada: {self.turno_atual['entrada'].strftime('%d/%m/%Y %H:%M:%S')}")
+            print(f"\nVocê possui um turno ativo.")
+            print(f"Entidade: {self.turno_atual['nome_entidade']}")
+            print(f"Entrada: {self.turno_atual['entrada'].strftime('%d/%m/%Y às %H:%M')}")
             
-            return self.menu_turno_ativo()
+            # Direciona para o fluxo específico baseado na função
+            if self.trabalhador_atual['funcao'] == 'MEDICO':
+                return self.fluxo_medico()
+            else:  # ENFERMEIRO
+                return self.fluxo_enfermeiro()
         else:
             # Não tem turno ativo
             print("\nVocê não possui turno ativo no momento.")
             return self.menu_iniciar_turno()
     
-    def menu_turno_ativo(self) -> bool:
-        """Menu de opções quando há turno ativo."""
+    def fluxo_medico(self) -> bool:
+        """Fluxo de operações para médicos."""
         while True:
             print("\n" + "-" * 60)
-            print("O que deseja fazer?")
+            print("MENU MÉDICO")
+            print("-" * 60)
+            print("1 - Fazer um pedido de recurso")
+            print("2 - Buscar relatórios de caso de um paciente")
+            print("3 - Cadastrar relatório de caso")
+            print("4 - Finalizar turno")
+            print("5 - Sair")
+            
+            opcao = input("\nEscolha uma opção: ").strip()
+            
+            if opcao == '1':
+                self.passo3_fazer_pedido()
+            elif opcao == '2':
+                self.buscar_relatorio_caso()
+            elif opcao == '3':
+                print("\nFuncionalidade em desenvolvimento.")
+            elif opcao == '4':
+                return self.passo4_finalizar_turno()
+            elif opcao == '5':
+                print("\nSessão encerrada.")
+                return True
+            else:
+                print("Opção inválida!")
+    
+    def fluxo_enfermeiro(self) -> bool:
+        """Fluxo de operações para enfermeiros."""
+        while True:
+            print("\n" + "-" * 60)
+            print("MENU ENFERMEIRO")
+            print("-" * 60)
             print("1 - Fazer um pedido de recurso")
             print("2 - Finalizar turno")
             print("3 - Sair")
@@ -127,18 +161,21 @@ class SistemaSaude:
     
     def menu_iniciar_turno(self) -> bool:
         """Menu para iniciar um novo turno."""
-        print("\n" + "-" * 60)
-        print("Deseja iniciar um novo turno?")
-        print("1 - Sim")
-        print("2 - Não (sair)")
-        
-        opcao = input("\nEscolha uma opção: ").strip()
-        
-        if opcao == '1':
-            return self.iniciar_turno()
-        else:
-            print("\nAplicação encerrada.")
-            return False
+        while True:
+            print("\n" + "-" * 60)
+            print("Deseja iniciar um novo turno?")
+            print("1 - Sim")
+            print("2 - Não (sair)")
+            
+            opcao = input("\nEscolha uma opção: ").strip()
+            
+            if opcao == '1':
+                return self.iniciar_turno()
+            elif opcao == '2' or opcao == '0':
+                print("\nAplicação encerrada.")
+                return False
+            else:
+                print("Opção inválida! Tente novamente.")
     
     def iniciar_turno(self) -> bool:
         """Inicia um novo turno."""
@@ -146,28 +183,37 @@ class SistemaSaude:
         print("INICIAR NOVO TURNO")
         print("-" * 60)
         
-        # Buscar entidades por nome
-        nome_busca = input("\nDigite o início do nome da entidade de saúde: ").strip()
+        nome_busca = input("\nDigite o nome da entidade: ").strip()
         
-        # Regex para validar que o nome não contém caracteres especiais perigosos
-        if not re.match(r'^[a-zA-Z0-9\s\.\-]+$', nome_busca):
-            print("Nome inválido! O nome deve conter apenas letras, números, espaços, pontos ou hífens.")
+        if not nome_busca:
+            print("Nome não pode ser vazio.")
             return False
         
-        # Buscar entidades com LIKE
         entidades = self.trabalhador_service.buscar_entidades_por_nome(nome_busca)
         
         if not entidades:
             print(f"Nenhuma entidade encontrada com nome começando por '{nome_busca}'.")
             return False
         
-        print(f"\nEntidades encontradas ({len(entidades)}):")
+        print(f"\nEntidades encontradas:")
         for i, (cnes, nome, tipo) in enumerate(entidades, 1):
-            print(f"{i}. {nome} ({tipo}) - CNES: {cnes}")
+            print(f"{i}. {nome} ({tipo})")
+        print("0. Sair")
+        
+        while True:
+            try:
+                escolha = int(input("\nEscolha o número da entidade: ").strip())
+                if escolha == 0:
+                    return False
+                elif 1 <= escolha <= len(entidades):
+                    break
+                else:
+                    print("Opção inválida! Tente novamente.")
+            except ValueError:
+                print("Entrada inválida! Digite um número.")
         
         try:
-            escolha = int(input("\nEscolha o número da entidade: ").strip())
-            if 1 <= escolha <= len(entidades):
+            if True:
                 cnes_escolhido = entidades[escolha - 1][0]
                 nome_escolhido = entidades[escolha - 1][1]
                 
@@ -184,19 +230,16 @@ class SistemaSaude:
                     'nome_entidade': nome_escolhido
                 }
                 
-                print(f"\n Turno iniciado com sucesso!")
-                print(f"  Entidade: {nome_escolhido}")
-                print(f"  ID do turno: {id_turno}")
+                print(f"\nTurno iniciado com sucesso!")
+                print(f"Entidade: {nome_escolhido}")
                 
-                return self.menu_turno_ativo()
-            else:
-                print("✗ Opção inválida!")
-                return False
-        except ValueError:
-            print("✗ Entrada inválida!")
-            return False
+                # Direciona para o fluxo específico baseado na função
+                if self.trabalhador_atual['funcao'] == 'MEDICO':
+                    return self.fluxo_medico()
+                else:  # ENFERMEIRO
+                    return self.fluxo_enfermeiro()
         except Exception as e:
-            print(f"✗ Erro ao iniciar turno: {e}")
+            print(f"Erro ao iniciar turno.")
             return False
     
     def passo3_fazer_pedido(self):
@@ -216,40 +259,62 @@ class SistemaSaude:
         
         print("\nRecursos disponíveis:")
         for i, (registro_ms, nome, tipo) in enumerate(recursos, 1):
-            print(f"{i}. {nome} ({tipo}) - Registro MS: {registro_ms}")
+            print(f"{i}. {nome} ({tipo})")
+        print("0. Cancelar")
         
-        try:
-            # Escolher recurso
-            escolha = int(input("\nEscolha o número do recurso: ").strip())
-            if not (1 <= escolha <= len(recursos)):
-                print("Opção inválida!")
-                return
-            
-            recurso_escolhido = recursos[escolha - 1]
-            registro_ms = recurso_escolhido[0]
-            nome_recurso = recurso_escolhido[1]
-            
-            # Quantidade
-            quantidade = int(input("Quantidade solicitada: ").strip())
-            if quantidade <= 0:
-                print("Quantidade deve ser maior que zero!")
-                return
-            
-            # Urgência
+        # Escolher recurso
+        while True:
+            try:
+                escolha = int(input("\nEscolha o número do recurso: ").strip())
+                if escolha == 0:
+                    return
+                elif 1 <= escolha <= len(recursos):
+                    break
+                else:
+                    print("Opção inválida! Tente novamente.")
+            except ValueError:
+                print("Entrada inválida! Digite um número.")
+        
+        recurso_escolhido = recursos[escolha - 1]
+        registro_ms = recurso_escolhido[0]
+        nome_recurso = recurso_escolhido[1]
+        
+        # Quantidade
+        while True:
+            try:
+                quantidade = int(input("Quantidade solicitada: ").strip())
+                if quantidade > 0:
+                    break
+                else:
+                    print("Quantidade deve ser maior que zero! Tente novamente.")
+            except ValueError:
+                print("Entrada inválida! Digite um número.")
+        
+        # Urgência
+        while True:
             print("\nNível de urgência:")
             print("1 - BAIXA")
             print("2 - MEDIA")
             print("3 - EXTREMA")
-            urgencia_opt = input("Escolha (1, 2 ou 3): ").strip()
+            print("0 - Cancelar pedido")
+            urgencia_opt = input("Escolha uma opção: ").strip()
+            
+            if urgencia_opt == '0':
+                return
             
             urgencia_map = {'1': 'BAIXA', '2': 'MEDIA', '3': 'EXTREMA'}
-            urgencia = urgencia_map.get(urgencia_opt, 'BAIXA')
-            
-            # Justificativa
-            justificativa = input("\nJustificativa (opcional, pressione Enter para pular): ").strip()
-            justificativa = justificativa if justificativa else None
-            
-            # Criar pedido com transação
+            if urgencia_opt in urgencia_map:
+                urgencia = urgencia_map[urgencia_opt]
+                break
+            else:
+                print("Opção inválida! Tente novamente.")
+        
+        # Justificativa
+        justificativa = input("\nJustificativa (opcional, pressione Enter para pular): ").strip()
+        justificativa = justificativa if justificativa else None
+        
+        # Criar pedido com transação
+        try:
             with self.db.transaction():
                 id_pedido = self.pedido_service.criar_pedido(
                     self.turno_atual['id'],
@@ -260,16 +325,22 @@ class SistemaSaude:
                 )
             
             print(f"\nPedido criado com sucesso!")
-            print(f"  ID do pedido: {id_pedido}")
-            print(f"  Recurso: {nome_recurso}")
-            print(f"  Quantidade: {quantidade}")
-            print(f"  Urgência: {urgencia}")
+            print(f"Recurso: {nome_recurso}")
+            print(f"Quantidade: {quantidade}")
+            print(f"Urgência: {urgencia}")
             
-        except ValueError:
-            print("Entrada inválida!")
         except Exception as e:
             print(f"Erro ao criar pedido: {e}")
     
+    def buscar_relatorio_caso(self):
+        cpf = input("\nInforme o CPF do paciente:").strip()
+        cpf_padrao = r'[0-9]{11}'
+        if not re.fullmatch(cpf_padrao, cpf):
+            print("CPF inválido (deve conter exatamente 11 números).")
+            return
+        print(self.paciente_service.verifica_cadastro_paciente(cpf))
+
+
     def passo4_finalizar_turno(self) -> bool:
         """
         PASSO 4: Finalizar o turno atual.
@@ -278,39 +349,44 @@ class SistemaSaude:
         print("PASSO 4: FINALIZAR TURNO")
         print("=" * 60)
         
-        print("\nTem certeza que deseja finalizar o turno?")
-        print("1 - Sim")
-        print("2 - Não")
+        while True:
+            print("\nTem certeza que deseja finalizar o turno?")
+            print("1 - Sim")
+            print("2 - Não")
+            
+            opcao = input("\nEscolha uma opção: ").strip()
+            
+            if opcao == '1':
+                break
+            elif opcao == '2':
+                print("\nTurno não finalizado.")
+                return False
+            else:
+                print("Opção inválida! Tente novamente.")
         
-        opcao = input("\nEscolha uma opção: ").strip()
-        
-        if opcao == '1':
+        if True:
             try:
                 # Finalizar turno com transação
                 with self.db.transaction():
                     self.trabalhador_service.finalizar_turno(self.turno_atual['id'])
                 
-                print(f"\n✓ Turno finalizado com sucesso!")
-                print(f"  ID do turno: {self.turno_atual['id']}")
-                print(f"  Entidade: {self.turno_atual['nome_entidade']}")
+                print(f"\nTurno finalizado com sucesso!")
+                print(f"Entidade: {self.turno_atual['nome_entidade']}")
                 
                 # Mostrar pedidos feitos durante o turno
                 pedidos = self.pedido_service.listar_pedidos_turno(self.turno_atual['id'])
                 if pedidos:
-                    print(f"\n  Total de pedidos realizados: {len(pedidos)}")
+                    print(f"\nTotal de pedidos realizados: {len(pedidos)}")
                     for i, pedido in enumerate(pedidos, 1):
-                        print(f"    {i}. {pedido[2]} - Qtd: {pedido[3]} - Urgência: {pedido[4]}")
+                        print(f"  {i}. {pedido[2]} - Qtd: {pedido[3]} - Urgência: {pedido[4]}")
                 
                 self.turno_atual = None
-                print("\n✓ Sessão encerrada.")
+                print("\nSessão encerrada.")
                 return True
                 
             except Exception as e:
-                print(f"✗ Erro ao finalizar turno: {e}")
+                print(f"Erro ao finalizar turno: {e}")
                 return False
-        else:
-            print("\nTurno não finalizado.")
-            return False
     
     def executar(self):
         """Executa o fluxo principal da aplicação."""
