@@ -20,20 +20,19 @@ ORDER BY h.cnes_hospital;
 -- Consulta 2
 /* Pesquisar pelos pedidos sob análise que requisitarem por uma quantia de um determinado recurso acima da disponível no estoque total
 e exibir o pedido, o recurso, o estoque externo total e a quantia em falta daquele recurso. */
-SELECT P.id_pedido, R.nome, R.registro_ms, P.quantidade, EXT.ESTOQUE_EXTERNO, (EXT.ESTOQUE_EXTERNO - P.quantidade) AS EM_FALTA -- Calcula-se a falta como a diferença da quantia pedida e do estoque externo.
+SELECT P.id_pedido, R.nome, R.registro_ms, P.quantidade, (EXT.estoque_total - COALESCE(PS.quantidade_disponivel, 0)) AS estoque_externo, 
+((EXT.estoque_total - COALESCE(PS.quantidade_disponivel, 0)) - P.quantidade) as em_falta -- Calcula-se a falta como a diferença da quantia pedida e do estoque externo.
     FROM relatorio_recurso RR
     JOIN pedido P ON P.id_pedido = RR.id_pedido_relatorio
     JOIN turno T ON P.id_turno = T.id_turno 
     JOIN entidade_saude ES ON ES.cnes = T.cnes_entidade_saude
     JOIN recurso R ON R.registro_ms = P.registro_ms_recurso 
-JOIN LATERAL(
-    SELECT SUM(PO.quantidade_disponivel) as ESTOQUE_EXTERNO -- Soma de todas as quantias para cada recurso.
-    FROM possui PO 
-    JOIN entidade_saude ES2 ON PO.cnes_entidade_saude = ES2.cnes
-    WHERE ES2.cnes <> ES.cnes AND PO.registro_ms_recurso = P.registro_ms_recurso) -- É necessário filtrar a entidade de saúde que fez o pedido da soma de recurso.
-    AS EXT ON TRUE
-WHERE P.quantidade > EXT.ESTOQUE_EXTERNO AND RR.estado_relatorio = 'ANALISE'; -- Exibe-se somente os pedidos em análise e que atendam à condição proposta.
-
+    LEFT JOIN possui PS ON PS.cnes_entidade_saude = ES.cnes AND PS.registro_ms_recurso = P.registro_ms_recurso -- Junção externa para não excluirmos hospitais que não possuem o recurso que estão pedindo.
+    JOIN (
+        SELECT SUM(PO.quantidade_disponivel) AS estoque_total, PO.registro_ms_recurso AS recurso
+        FROM possui PO 
+        GROUP BY PO.registro_ms_recurso) as EXT ON EXT.recurso = P.registro_ms_recurso -- Cálculo generalizado do estoque total de todos os recursos pedidos.
+WHERE P.quantidade > (EXT.estoque_total - COALESCE(PS.quantidade_disponivel, 0)) AND RR.estado_relatorio = 'ANALISE' -- Somente exibição dos pedidos em análise;
 
 
 -- Consulta 3.

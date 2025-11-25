@@ -180,3 +180,29 @@ SELECT
     'Demanda massiva. Confirmando declaração de epidemia e verificando disponibilidade nacional. Necessário coordenação com Ministério da Saúde para liberação de estoque estratégico.'
 FROM ped;
 
+
+WITH ped AS (
+    INSERT INTO pedido (id_turno, registro_ms_recurso, tstz_pedido, quantidade, urgencia, justificativa)
+    SELECT 
+        t.id_turno,
+        '7890123456789',
+        '2025-11-19 14:30:00-03',
+        9999,
+        'MEDIA',
+        'Aumento grave de casos de pneumonia comunitária. Antibiótico de primeira escolha em falta no estoque.'
+    FROM turno t
+    JOIN pessoa p ON t.id_trabalhador_es = p.id_pessoa
+    WHERE p.cpf = '40420248282' 
+      AND t.cnes_entidade_saude = '2751501' 
+      AND t.tstz_entrada = '2025-11-19 08:00:00-03'
+    RETURNING id_pedido
+)
+INSERT INTO relatorio_recurso (id_pedido_relatorio, id_diretor, tstz_relatorio_recurso, estado_relatorio, justificativa_decisao)
+SELECT 
+    id_pedido,
+    (SELECT id_pessoa FROM pessoa WHERE cpf = '10111213141'),
+    '2025-11-19 14:00:00-03',
+    'ANALISE',
+    ''
+FROM ped;
+
