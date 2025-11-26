@@ -21,7 +21,7 @@ ORDER BY h.cnes_hospital;
 /* Pesquisar pelos pedidos sob análise que requisitarem por uma quantia de um determinado recurso acima da disponível no estoque total
 e exibir o pedido, o recurso, o estoque externo total e a quantia em falta daquele recurso. */
 SELECT P.id_pedido, R.nome, R.registro_ms, P.quantidade, (COALESCE(EXT.estoque_total,0) - COALESCE(PS.quantidade_disponivel, 0)) AS estoque_externo, 
-((EXT.estoque_total - COALESCE(PS.quantidade_disponivel, 0)) - P.quantidade) as em_falta -- Calcula-se a falta como a diferença da quantia pedida e do estoque externo.
+((COALESCE(EXT.estoque_total, 0) - COALESCE(PS.quantidade_disponivel, 0)) - P.quantidade) as em_falta -- Calcula-se a falta como a diferença da quantia pedida e do estoque externo.
     FROM relatorio_recurso RR
     JOIN pedido P ON P.id_pedido = RR.id_pedido_relatorio
     JOIN turno T ON P.id_turno = T.id_turno 
