@@ -16,7 +16,7 @@ CREATE TABLE pessoa (
 );
 
 CREATE TABLE tipo_pessoa (
-     INTEGER   NOT NULL,
+    id_pessoa INTEGER   NOT NULL,
     tipo      CHAR(14)  NOT NULL,  -- 'PACIENTE', 'TRABALHADOR_ES', 'DIRETOR', 'GESTOR'
 
     CONSTRAINT pk_tipo_pessoa PRIMARY KEY (id_pessoa, tipo),
