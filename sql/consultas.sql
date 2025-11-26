@@ -20,7 +20,7 @@ ORDER BY h.cnes_hospital;
 -- Consulta 2
 /* Pesquisar pelos pedidos sob análise que requisitarem por uma quantia de um determinado recurso acima da disponível no estoque total
 e exibir o pedido, o recurso, o estoque externo total e a quantia em falta daquele recurso. */
-SELECT P.id_pedido, R.nome, R.registro_ms, P.quantidade, (EXT.estoque_total - COALESCE(PS.quantidade_disponivel, 0)) AS estoque_externo, 
+SELECT P.id_pedido, R.nome, R.registro_ms, P.quantidade, (COALESCE(EXT.estoque_total,0) - COALESCE(PS.quantidade_disponivel, 0)) AS estoque_externo, 
 ((EXT.estoque_total - COALESCE(PS.quantidade_disponivel, 0)) - P.quantidade) as em_falta -- Calcula-se a falta como a diferença da quantia pedida e do estoque externo.
     FROM relatorio_recurso RR
     JOIN pedido P ON P.id_pedido = RR.id_pedido_relatorio
@@ -28,11 +28,11 @@ SELECT P.id_pedido, R.nome, R.registro_ms, P.quantidade, (EXT.estoque_total - CO
     JOIN entidade_saude ES ON ES.cnes = T.cnes_entidade_saude
     JOIN recurso R ON R.registro_ms = P.registro_ms_recurso 
     LEFT JOIN possui PS ON PS.cnes_entidade_saude = ES.cnes AND PS.registro_ms_recurso = P.registro_ms_recurso -- Junção externa para não excluirmos hospitais que não possuem o recurso que estão pedindo.
-    JOIN (
+    LEFT JOIN (
         SELECT SUM(PO.quantidade_disponivel) AS estoque_total, PO.registro_ms_recurso AS recurso
         FROM possui PO 
-        GROUP BY PO.registro_ms_recurso) as EXT ON EXT.recurso = P.registro_ms_recurso -- Cálculo generalizado do estoque total de todos os recursos pedidos.
-WHERE P.quantidade > (EXT.estoque_total - COALESCE(PS.quantidade_disponivel, 0)) AND RR.estado_relatorio = 'ANALISE' -- Somente exibição dos pedidos em análise;
+        GROUP BY PO.registro_ms_recurso) as EXT ON EXT.recurso = P.registro_ms_recurso -- Cálculo generalizado do estoque total de todos os recursos pedidos. Junção externa para pedidos de recursos que não existem em nenhum hospital.
+WHERE P.quantidade > (COALESCE(EXT.estoque_total,0) - COALESCE(PS.quantidade_disponivel, 0)) AND RR.estado_relatorio = 'ANALISE' -- Somente exibição dos pedidos em análise;
 
 
 -- Consulta 3.
@@ -55,12 +55,23 @@ JOIN recurso r ON rf.registro_ms_recurso = r.registro_ms;
 
 
 -- Consulta 4.
--- 
-SELECT * FROM transportadora
-    WHERE temp_min_suportada <= 
-    (SELECT MIN(temp_min) FROM RECURSO) AND
-    temp_max_suportada >=
-    (SELECT MAX(temp_max) FROM RECURSO);
+SELECT H.* -- Selecionar todos os atributos de hospital
+    FROM HOSPITAL H 
+        WHERE NOT EXISTS ( -- Se Not Exists for vazio, então atende a condição where e é retornado
+            (SELECT E1.ESPECIALIDADE
+                FROM ESPECIALIZACOES E1
+            GROUP BY E1.ESPECIALIDADE
+            ORDER BY COUNT(*) ASC
+            LIMIT 3)
+        -- Tradução: Seleção das 3 especialidades menos frequentes
+    
+        EXCEPT
+         -- Subtração de conjuntos, A - B = tudo que está em A e não está em B     
+            (SELECT E.ESPECIALIDADE 
+                FROM ESPECIALIZACOES E
+            WHERE E.cnes_hospital = H.cnes_hospital)
+            -- Tradução: Seleção de todas as especialidades de um dado hospital
+        );
 
 
 -- Consulta 5.
