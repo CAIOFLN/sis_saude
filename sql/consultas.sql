@@ -38,19 +38,19 @@ WHERE P.quantidade > (COALESCE(EXT.estoque_total,0) - COALESCE(PS.quantidade_dis
 -- Consulta 3.
 -- Recursos que são produzidos por laboratorios mas nenhum hospital tem em estoque
 
-WITH recursos_faltantes AS (
-    SELECT registro_ms_recurso
-    FROM produz
-    EXCEPT
-    SELECT p.registro_ms_recurso
-    FROM hospital h 
-    JOIN possui p ON h.cnes_hospital = p.cnes_entidade_saude
-    WHERE p.quantidade_disponivel > 0
-)
 SELECT r.registro_ms, r.nome, r.tipo
-FROM recursos_faltantes rf 
-JOIN recurso r ON rf.registro_ms_recurso = r.registro_ms;
-
+FROM recurso r
+JOIN produz P
+    ON r.registro_ms = P.registro_ms_recurso
+LEFT JOIN (
+        SELECT DISTINCT p.registro_ms_recurso
+        FROM possui p
+        JOIN entidade_saude es 
+            ON p.cnes_entidade_saude = es.cnes
+        WHERE es.tipo_entidade = 'HOSPITAL' AND p.quantidade_disponivel > 0
+    ) AS RecursosComEstoqueEmHospital
+    ON r.registro_ms = RecursosComEstoqueEmHospital.registro_ms_recurso
+WHERE RecursosComEstoqueEmHospital.registro_ms_recurso IS NULL;
 
 
 
