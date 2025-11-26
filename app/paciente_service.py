@@ -21,7 +21,15 @@ class PacienteService:
                 FROM tipo_pessoa
                 WHERE id_pessoa = %s and tipo = 'PACIENTE';
             """
-            paciente = self.db.fetch_one(query2, (existe_pessoa[0],))
+            paciente = self.db.fetch_one(query2, (existe_pessoa))
             if paciente:
-                return True
+                return existe_pessoa
         return False
+
+    def busca_turno_paciente(self, id_paciente):
+        querry = """"
+            SELECT 
+            FROM relatorio_caso rc JOIN turno t ON rc.id_turno = t.id_turno
+            WHERE id_paciente = %s
+        """ 
+        

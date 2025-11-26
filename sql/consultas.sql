@@ -15,7 +15,6 @@ JOIN ( -- podemos fazer join pois devido ao CROSS JOIN ja temos todas as combina
 WHERE (COALESCE(p.quantidade_disponivel, 0) < media.avg_estoque or COALESCE(p.quantidade_disponivel, 0) = 0)
 ORDER BY h.cnes_hospital;
 
--- Não criei casos especificos pois os dados padroes ja geram uma boa querry
 
 -- Consulta 2
 /* Pesquisar pelos pedidos sob análise que requisitarem por uma quantia de um determinado recurso acima da disponível no estoque total
@@ -37,11 +36,9 @@ WHERE P.quantidade > (COALESCE(EXT.estoque_total,0) - COALESCE(PS.quantidade_dis
 
 -- Consulta 3.
 -- Recursos que são produzidos por laboratorios mas nenhum hospital tem em estoque
-
 SELECT r.registro_ms, r.nome, r.tipo
 FROM recurso r
-JOIN produz P
-    ON r.registro_ms = P.registro_ms_recurso
+JOIN produz P ON r.registro_ms = P.registro_ms_recurso
 LEFT JOIN (
         SELECT DISTINCT p.registro_ms_recurso
         FROM possui p
@@ -55,6 +52,7 @@ WHERE RecursosComEstoqueEmHospital.registro_ms_recurso IS NULL;
 
 
 -- Consulta 4.
+-- Selecionar quais hospitais atendem todas as 3 especialidades menos frequentes
 SELECT H.* -- Selecionar todos os atributos de hospital
     FROM HOSPITAL H 
         WHERE NOT EXISTS ( -- Se Not Exists for vazio, então atende a condição where e é retornado
@@ -62,11 +60,10 @@ SELECT H.* -- Selecionar todos os atributos de hospital
                 FROM ESPECIALIZACOES E1
             GROUP BY E1.ESPECIALIDADE
             ORDER BY COUNT(*) ASC
-            LIMIT 3)
+            LIMIT 3);
         -- Tradução: Seleção das 3 especialidades menos frequentes
     
         EXCEPT
-         -- Subtração de conjuntos, A - B = tudo que está em A e não está em B     
             (SELECT E.ESPECIALIDADE 
                 FROM ESPECIALIZACOES E
             WHERE E.cnes_hospital = H.cnes_hospital)
@@ -83,8 +80,7 @@ WITH recursos_requisitados AS (
     SELECT DISTINCT p.registro_ms_recurso
     FROM relatorio_recurso r JOIN pedido p ON r.id_pedido_relatorio = p.id_pedido
         JOIN turno t ON p.id_turno = t.id_turno
-        JOIN entidade_saude es ON t.cnes_entidade_saude = es.cnes
-    WHERE (es.cnes = '2751503' AND r.estado_relatorio = 'ANALISE'))
+    WHERE (t.cnes_entidade_saude = '2751503' AND r.estado_relatorio = 'ANALISE'))
 SELECT cnes_laboratorio, COUNT(*)
 FROM produz 
 WHERE registro_ms_recurso IN (SELECT * FROM recursos_requisitados)
@@ -92,17 +88,3 @@ GROUP BY cnes_laboratorio
 HAVING COUNT(*) = (SELECT COUNT(*) FROM recursos_requisitados);
 
 
-
-WITH menos_frequentes AS (
-    SELECT especialidade
-    FROM especializacoes
-    GROUP BY especialidade
-    ORDER BY COUNT(*) ASC
-    LIMIT 3
-)
-SELECT h.*
-FROM hospital AS h
-JOIN especializacoes AS e ON h.cnes_hospital = e.cnes_hospital
-WHERE e.especialidade IN (SELECT especialidade FROM menos_frequentes)
-GROUP BY h.cnes_hospital
-HAVING COUNT(DISTINCT e.especialidade) >= 3;

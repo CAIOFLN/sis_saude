@@ -63,6 +63,7 @@ VALUES
     ('2751801', '6789012345678'),  -- Vacina Hepatite B
     ('2751801', '9012345678901');  -- Ibuprofeno
 
+-- Dado de teste para a consulta 4
 INSERT INTO produz 
 VALUES ('2751801', '1122334455667');
 
