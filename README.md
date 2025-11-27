@@ -1,57 +1,45 @@
-# Sistema de Saúde (Sis_Saúde)
+#  Sistema de Saúde (Sis_Saúde)
 
 Sistema de gerenciamento de turnos, pedidos de recursos e relatórios de casos para profissionais de saúde.
 
 ## 🚀 Instalação e Configuração
 
-### 1. Clonar o Repositório
+### 1. Configurar o Banco de Dados PostgreSQL
 
-```bash
-git clone <url-do-repositorio>
-cd sis_saude
-```
-
-### 2. Configurar o Banco de Dados PostgreSQL
-
-#### 2.1. Conectar ao PostgreSQL
+#### 1.1. Conectar ao PostgreSQL
 
 ```bash
 psql -d postgres -U seu_usuario
 ```
 
-#### 2.2. Criar o Banco de Dados
+#### 1.2. Criar o Banco de Dados
 
 ```sql
 CREATE DATABASE sis_saude;
 ```
 
-#### 2.3. Conectar ao Banco Criado
+#### 1.3. Conectar ao Banco Criado
 
 ```sql
 \c sis_saude;
 ```
 
-#### 2.4. Sair do psql
 
-```sql
-\q
-```
+### 2. Executar os Scripts SQL
 
-### 3. Executar os Scripts SQL
-
-#### 3.1. Criar o Esquema do Banco
+#### 2.1. Criar o Esquema do Banco
 
 ```bash
 psql -d sis_saude -U seu_usuario -f sql/schema.sql
 ```
 
-#### 3.2. Inserir Dados Iniciais
+#### 2.2. Inserir Dados Iniciais
 
 ```bash
 psql -d sis_saude -U seu_usuario -f sql/inser_data/insere_tudo.sql
 ```
 
-### 4. Configurar Variáveis de Ambiente
+### 3. Configurar Variáveis de Ambiente
 
 Crie um arquivo `.env` na raiz do diretório `app`:
 
@@ -65,7 +53,7 @@ DB_PASSWORD=sua_senha
 
 **⚠️ Importante:** Substitua `seu_usuario` e `sua_senha` pelos valores do seu PostgreSQL.
 
-### 5. Instalar Dependências Python
+### 4. Instalar Dependências Python
 
 ```bash
 pip install -r requirements.txt
