@@ -43,7 +43,9 @@ CREATE TABLE trabalhador_es (
     CONSTRAINT fk_trabalhador_es_pessoa
         FOREIGN KEY (id_pessoa) REFERENCES pessoa(id_pessoa),
     CONSTRAINT sk_trabalhador_es_registro_funcao
-        UNIQUE (registro_profissional, funcao_trabalhador), -- EXPLICAR ISSO NO RELATORIO
+        UNIQUE (registro_profissional, funcao_trabalhador),
+         -- Pode existir um caso em que exista um enfermeiro com COREM igual o CRM
+         -- Para evitar isso colocamos a funcao do ngc
     CONSTRAINT check_trabalhador_es_funcao
         CHECK (funcao_trabalhador IN ('MEDICO', 'ENFERMEIRO')),
     CONSTRAINT check_trabalhador_es_registro
