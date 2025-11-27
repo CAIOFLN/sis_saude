@@ -430,8 +430,7 @@ class SistemaSaude:
                     # 2. Cadastrar na tabela paciente
                     self.paciente_service.cadastrar_paciente(resultado['id_pessoa'])
                     print("Paciente cadastrado")
-
-
+                    
                     # 3. Inserir relatório de caso
                     relatorio = self.paciente_service.insere_relatorio_caso(
                         resultado['id_pessoa'],
