@@ -278,7 +278,7 @@ CREATE TABLE relatorio_caso (
         FOREIGN KEY (id_turno) REFERENCES turno(id_turno),
 
     CONSTRAINT check_palavras_chaves_relatorio_recurso
-        CHECK palavra_chave_1 != palavra_chave_2
+        CHECK (palavra_chave_1 != palavra_chave_2)
 );
 
 CREATE TABLE encaminhamento (
@@ -375,7 +375,7 @@ CREATE TABLE transportadora (
     CONSTRAINT check_transportadora_cnpj CHECK (cnpj ~ '^[0-9]{14}$'),
     CONSTRAINT check_transportadora_telefone
         CHECK (telefone IS NULL OR telefone ~ '^\([0-9]{2}\)[0-9]{5}-[0-9]{4}$'),
-    CONSTRAINT chkec_transportadora_intervalo_temp
+    CONSTRAINT check_transportadora_intervalo_temp
         CHECK (temp_min_suportada IS NULL OR temp_max_suportada IS NULL OR temp_min_suportada <= temp_max_suportada)
 );
 

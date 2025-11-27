@@ -111,6 +111,75 @@ SELECT
 FROM ped;
 
 
+------------------------------------------------------------
+-- 1. PREPARAÇÃO: CRIAR UM HOSPITAL E UM LABORATÓRIO
+------------------------------------------------------------
+INSERT INTO entidade_saude (cnes, nome, tipo_entidade, cep, numero_endereco) VALUES
+('3950217', 'Hospital Santa Validação', 'HOSPITAL', '12345678', '100'),
+('3950218', 'Laboratório Farmacêutico Oficial', 'LABORATORIO', '87654321', '200');
+
+INSERT INTO hospital (cnes_hospital, leitos_normais_disp, leitos_uti_disp) VALUES
+('3950217', 50, 10);
+
+INSERT INTO laboratorio (cnes_laboratorio) VALUES
+('3950218');
+
+------------------------------------------------------------
+-- 2. INSERIR RECURSOS (NOVOS MEDICAMENTOS REAIS)
+------------------------------------------------------------
+
+-- CASO 1 (ALVO): Produzido pelo Lab, mas Hospital NÃO tem registro.
+-- Resultado esperado: DEVE APARECER (Falta total).
+INSERT INTO recurso (registro_ms, nome, tipo, temp_min, temp_max)
+VALUES ('1000000000001', 'Amoxicilina 500mg', 'Medicamento', 15.00, 30.00);
+
+-- CASO 2 (ESTOQUE ZERO): Produzido pelo Lab, Hospital tem registro mas Qtd = 0.
+-- Resultado esperado: DEVE APARECER (Estoque zerado).
+INSERT INTO recurso (registro_ms, nome, tipo, temp_min, temp_max)
+VALUES ('1000000000002', 'Omeprazol 20mg', 'Medicamento', 15.00, 30.00);
+
+-- CASO 3 (FALSO POSITIVO): Produzido pelo Lab, e Hospital TEM estoque.
+-- Resultado esperado: NÃO deve aparecer.
+INSERT INTO recurso (registro_ms, nome, tipo, temp_min, temp_max)
+VALUES ('1000000000003', 'Simvastatina 20mg', 'Medicamento', 15.00, 30.00);
+
+-- CASO 4 (NÃO PRODUZIDO): Ninguém produz (não está na tabela produz).
+-- Resultado esperado: NÃO deve aparecer (filtrado pelo primeiro JOIN).
+INSERT INTO recurso (registro_ms, nome, tipo, temp_min, temp_max)
+VALUES ('1000000000004', 'Clonazepam 2.5mg', 'Medicamento', 15.00, 30.00);
+
+-- CASO 5 (ESTOQUE NO LAB): Produzido, Lab tem estoque, mas Hospital não.
+-- Resultado esperado: DEVE APARECER (Disponível na fonte, falta na ponta).
+INSERT INTO recurso (registro_ms, nome, tipo, temp_min, temp_max)
+VALUES ('1000000000005', 'Metformina 850mg', 'Medicamento', 15.00, 30.00);
+
+------------------------------------------------------------
+-- 3. DEFINIR PRODUÇÃO (Tabela PRODUZ)
+------------------------------------------------------------
+-- O laboratório produz todos, EXCETO o Clonazepam (Caso 4)
+INSERT INTO produz (cnes_laboratorio, registro_ms_recurso) VALUES
+('3950218', '1000000000001'), -- Amoxicilina
+('3950218', '1000000000002'), -- Omeprazol
+('3950218', '1000000000003'), -- Simvastatina
+('3950218', '1000000000005'); -- Metformina
+
+------------------------------------------------------------
+-- 4. DEFINIR ESTOQUES (Tabela POSSUI)
+------------------------------------------------------------
+
+INSERT INTO possui (cnes_entidade_saude, registro_ms_recurso, quantidade_disponivel) VALUES
+-- O Hospital tem Simvastatina em estoque (Caso 3 - ok, não falta)
+('3950217', '1000000000003', 100),
+
+-- O Hospital tem Omeprazol cadastrado, mas acabou (0) (Caso 2 - falta)
+('3950217', '1000000000002', 0),
+
+-- O Laboratório tem estoque de Metformina para fornecer, 
+-- mas o hospital não tem nada (nem registro na tabela possui) (Caso 5 - falta no hospital)
+('3950218', '1000000000005', 500);
+
+-- A Amoxicilina (Caso 1) não entra no 'possui', simulando que o hospital nunca recebeu.
+
 -- ========================================
 -- CASO 4: INSULINA - 12.000 FRASCOS (EM ANÁLISE)
 -- ========================================
