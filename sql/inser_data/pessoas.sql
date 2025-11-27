@@ -402,3 +402,18 @@ tabela_tipo AS (
 INSERT INTO paciente (id_pessoa)
 SELECT id_pessoa
 FROM tabela_pessoa;
+
+
+WITH tabela_pessoa AS (
+    INSERT INTO pessoa (cpf, nome)
+    VALUES ('55667788990', 'Thiago Moreira Lopes')
+    RETURNING id_pessoa
+),
+tabela_tipo AS (
+    INSERT INTO tipo_pessoa (id_pessoa, tipo)
+    SELECT id_pessoa, 'PACIENTE'
+    FROM tabela_pessoa
+)
+INSERT INTO paciente (id_pessoa)
+SELECT id_pessoa
+FROM tabela_pessoa;

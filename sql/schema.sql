@@ -273,7 +273,10 @@ CREATE TABLE relatorio_caso (
     CONSTRAINT fk_relatorio_caso_paciente
         FOREIGN KEY (id_paciente) REFERENCES paciente(id_pessoa),
     CONSTRAINT fk_relatorio_caso_turno
-        FOREIGN KEY (id_turno) REFERENCES turno(id_turno)
+        FOREIGN KEY (id_turno) REFERENCES turno(id_turno),
+
+    CONSTRAINT check_palavras_chaves_relatorio_recurso
+        CHECK palavra_chave_1 != palavra_chave_2
 );
 
 CREATE TABLE encaminhamento (

@@ -13,13 +13,9 @@ class SistemaSaude:
         self.trabalhador_atual = None
         self.turno_atual = None
     
-    def conectar_banco(self) -> bool:
-        """Conecta ao banco de dados."""
+    def conectar_banco(self):
         print("=" * 60)
         print("SISTEMA DE SAÚDE - Gerenciamento de Turnos e Pedidos")
-        print("=" * 60)
-        print("\nConectando ao banco de dados...")
-        
         if self.db.connect():
             print("Conectado com sucesso!\n")
             return True
@@ -27,11 +23,7 @@ class SistemaSaude:
             print("Falha na conexão. Verifique as configurações do banco.")
             return False
     
-    def passo1_autenticacao(self) -> bool:
-        """
-        PASSO 1: Perguntar função e registro profissional.
-        Verifica se está cadastrado no banco.
-        """
+    def passo1_autenticacao(self):
         print("\n" + "=" * 60)
         print("PASSO 1: AUTENTICAÇÃO")
         print("=" * 60)
@@ -76,11 +68,6 @@ class SistemaSaude:
             return False
     
     def passo2_verificar_turno(self):
-        """
-        PASSO 2: Verifica se tem turno ativo.
-        Se não tem: opção de iniciar turno ou sair.
-        Se tem: direciona para o fluxo específico (médico ou enfermeiro).
-        """
         print("\n" + "=" * 60)
         print("PASSO 2: VERIFICAÇÃO DE TURNO")
         print("=" * 60)
@@ -128,7 +115,7 @@ class SistemaSaude:
             elif opcao == '2':
                 self.buscar_relatorio_caso()
             elif opcao == '3':
-                print("\nFuncionalidade em desenvolvimento.")
+                self.inserir_relatorio_caso()
             elif opcao == '4':
                 return self.passo4_finalizar_turno()
             elif opcao == '5':
@@ -333,18 +320,149 @@ class SistemaSaude:
             print(f"Erro ao criar pedido: {e}")
     
     def buscar_relatorio_caso(self):
-        cpf = input("\nInforme o CPF do paciente:").strip()
+        cpf = input("\nInforme o CPF do paciente: ").strip()
         cpf_padrao = r'[0-9]{11}'
         if not re.fullmatch(cpf_padrao, cpf):
             print("CPF inválido (deve conter exatamente 11 números).")
             return
-        print(self.paciente_service.verifica_cadastro_paciente(cpf))
+        
+        resultado = self.paciente_service.verifica_cadastro_paciente(cpf)
+        if not resultado:
+            print("Pessoa não encontrado no sistema.")
+            return
+        
+        if not resultado['tipo_paciente']:
+            print("Pessoa encontrada, mas não está cadastrada como PACIENTE.")
+            return
+        
+        relatorios = self.paciente_service.busca_relatorio_casos_paciente(resultado['id_pessoa'])
+        if not relatorios:
+            print(f"\nNenhum relatório de caso encontrado para o paciente CPF {cpf}")
+            return
+        
+        for i, relatorio in enumerate(relatorios, 1):    
+            texto, palavra1, palavra2, cnes, horario = relatorio
+            horario_fmt = horario.strftime("%d/%m/%Y %H:%M:%S")
+
+            print("-" * 60)
+            print(f"RELATÓRIO DE CASO {i}")
+            print(f"Texto: {texto}")
+            print(f"Palavra-chave 1: {palavra1 or 'N/A'}")
+            print(f"Palavra-chave 2: {palavra2 or 'N/A'}")
+            print(f"CNES da Entidade: {cnes}")
+            print(f"Horario do relatorio: {horario_fmt}")
+
+    def inserir_relatorio_caso(self):
+        cpf = input("\nInforme o CPF do paciente: ").strip()
+        cpf_padrao = r'[0-9]{11}'
+        if not re.fullmatch(cpf_padrao, cpf):
+            print("CPF inválido (deve conter exatamente 11 números).")
+            return
+        
+        resultado = self.paciente_service.verifica_cadastro_paciente(cpf)
+        
+        # Coletar informações do relatório primeiro
+        print("\n" + "-" * 60)
+        print("CADASTRAR RELATÓRIO DE CASO")
+        print("-" * 60)
+        
+        texto = input("\nTexto do relatório: ").strip()
+        if not texto:
+            print("Texto do relatório é obrigatório.")
+            return
+        
+        palavra1 = input("Palavra-chave 1 (opcional, Enter para pular): ").strip()
+        palavra1 = palavra1 if palavra1 else None
+        
+        palavra2 = input("Palavra-chave 2 (opcional, Enter para pular): ").strip()
+        palavra2 = palavra2 if palavra2 else None
+        
+        try:
+            # CASO 1: Pessoa não existe - cadastrar pessoa + tipo + relatório (tudo em uma transação)
+            if not resultado:
+                print("\nPessoa não encontrada. Cadastrando...")
+                nome = input("Nome completo: ").strip()
+                if not nome:
+                    print("Nome é obrigatório.")
+                    return
+                
+                with self.db.transaction():
+                    # 1. Cadastrar pessoa
+                    id_pessoa = self.paciente_service.cadastrar_pessoa(cpf, nome)
+                    print(f"Pessoa cadastrada (ID: {id_pessoa})")
+                    
+                    # 2. Adicionar tipo paciente
+                    self.paciente_service.adicionar_tipo_paciente(id_pessoa)
+                    print("Tipo PACIENTE adicionado")
+                    
+                    # 3. Cadastrar na tabela paciente
+                    self.paciente_service.cadastrar_paciente(id_pessoa)
+                    print("Paciente cadastrado")
 
 
-    def passo4_finalizar_turno(self) -> bool:
-        """
-        PASSO 4: Finalizar o turno atual.
-        """
+                    # 4. Inserir relatório de caso
+                    relatorio = self.paciente_service.insere_relatorio_caso(
+                        id_pessoa,
+                        self.turno_atual['id'],
+                        texto,
+                        palavra1,
+                        palavra2
+                    )
+                    # Commit automático ao sair do with se não houver erro
+                    # Se der qualquer erro o db.transaction da roll back devido ao contexto
+                print(f"\nRelatório de caso cadastrado com sucesso!")
+                print(f"ID do relatório: {relatorio[0]}")
+            
+            # CASO 2: Pessoa existe mas não é paciente - adicionar tipo + relatório (tudo em uma transação)
+            elif not resultado['tipo_paciente']:
+                print("\nPessoa encontrada, mas não é paciente. Adicionando tipo...")
+                
+                with self.db.transaction():
+                    # 1. Adicionar tipo paciente
+                    self.paciente_service.adicionar_tipo_paciente(resultado['id_pessoa'])
+                    print("Tipo PACIENTE adicionado")
+                    
+                    # 2. Cadastrar na tabela paciente
+                    self.paciente_service.cadastrar_paciente(resultado['id_pessoa'])
+                    print("Paciente cadastrado")
+
+
+                    # 3. Inserir relatório de caso
+                    relatorio = self.paciente_service.insere_relatorio_caso(
+                        resultado['id_pessoa'],
+                        self.turno_atual['id'],
+                        texto,
+                        palavra1,
+                        palavra2
+                    )
+                    # Commit automático ao sair do with se não houver erro
+                
+                print(f"\nRelatório de caso cadastrado com sucesso!")
+                print(f"ID do relatório: {relatorio[0]}")
+            
+            # CASO 3: Pessoa já é paciente - apenas inserir relatório
+            else:
+                with self.db.transaction():
+                    relatorio[0] = self.paciente_service.insere_relatorio_caso(
+                        resultado['id_pessoa'],
+                        self.turno_atual['id'],
+                        texto,
+                        palavra1,
+                        palavra2
+                    )
+                    # Commit automático ao sair do with se não houver erro
+                
+                print(f"\nRelatório de caso cadastrado com sucesso!")
+                print(f"ID do relatório: {relatorio[0]}")
+                    
+        except Exception as e:
+            print(f"\nErro ao cadastrar relatório: {e}")
+            print("Todas as operações foram revertidas.")
+
+
+
+    def passo4_finalizar_turno(self):
+
         print("\n" + "=" * 60)
         print("PASSO 4: FINALIZAR TURNO")
         print("=" * 60)
@@ -373,12 +491,6 @@ class SistemaSaude:
                 print(f"\nTurno finalizado com sucesso!")
                 print(f"Entidade: {self.turno_atual['nome_entidade']}")
                 
-                # Mostrar pedidos feitos durante o turno
-                pedidos = self.pedido_service.listar_pedidos_turno(self.turno_atual['id'])
-                if pedidos:
-                    print(f"\nTotal de pedidos realizados: {len(pedidos)}")
-                    for i, pedido in enumerate(pedidos, 1):
-                        print(f"  {i}. {pedido[2]} - Qtd: {pedido[3]} - Urgência: {pedido[4]}")
                 
                 self.turno_atual = None
                 print("\nSessão encerrada.")

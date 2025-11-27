@@ -12,17 +12,7 @@ class TrabalhadorService:
     def __init__(self, db: DatabaseConnection):
         self.db = db
     
-    def buscar_trabalhador(self, funcao: str, registro: str) -> Optional[Tuple]:
-        """
-        Busca trabalhador por função e registro profissional.
-        
-        Args:
-            funcao: 'MEDICO' ou 'ENFERMEIRO'
-            registro: CRM ou COREN
-        
-        Returns:
-            Tupla (id_pessoa, cpf, nome, funcao, registro) ou None
-        """
+    def buscar_trabalhador(self, funcao, registro):
         query = """
             SELECT t.id_pessoa, p.cpf, p.nome, t.funcao_trabalhador, t.registro_profissional
             FROM trabalhador_es t
