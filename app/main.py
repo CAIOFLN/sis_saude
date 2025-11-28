@@ -246,7 +246,6 @@ class SistemaSaude:
         if not recursos:
             print("Nenhum recurso cadastrado no sistema.")
             return
-        print(recursos)
         print("\nRecursos disponíveis:")
         for i, (registro_ms, nome, tipo) in enumerate(recursos, 1):
             print(f"{i}. {nome} ({tipo})")
@@ -394,15 +393,13 @@ class SistemaSaude:
                 with self.db.transaction():
                     # 1. Cadastrar pessoa
                     id_pessoa = self.paciente_service.cadastrar_pessoa(cpf, nome)
-                    print(f"Pessoa cadastrada (ID: {id_pessoa})")
                     
                     # 2. Adicionar tipo paciente
                     self.paciente_service.adicionar_tipo_paciente(id_pessoa)
-                    print("Tipo PACIENTE adicionado")
                     
                     # 3. Cadastrar na tabela paciente
                     self.paciente_service.cadastrar_paciente(id_pessoa)
-                    print("Paciente cadastrado")
+                    print(f"Paciente cadastrado com sucesso!")
 
 
                     # 4. Inserir relatório de caso
@@ -416,7 +413,6 @@ class SistemaSaude:
                     # Commit automático ao sair do with se não houver erro
                     # Se der qualquer erro o db.transaction da roll back devido ao contexto
                 print(f"\nRelatório de caso cadastrado com sucesso!")
-                print(f"ID do relatório: {relatorio[0]}")
             
             # CASO 2: Pessoa existe mas não é paciente - adicionar tipo + relatório (tudo em uma transação)
             elif not resultado['tipo_paciente']:
