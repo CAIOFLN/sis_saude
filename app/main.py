@@ -421,11 +421,10 @@ class SistemaSaude:
                 with self.db.transaction():
                     # 1. Adicionar tipo paciente
                     self.paciente_service.adicionar_tipo_paciente(resultado['id_pessoa'])
-                    print("Tipo PACIENTE adicionado")
                     
                     # 2. Cadastrar na tabela paciente
                     self.paciente_service.cadastrar_paciente(resultado['id_pessoa'])
-                    print("Paciente cadastrado")
+                    print("Paciente cadastrado com sucesso!")
                     
                     # 3. Inserir relatório de caso
                     relatorio = self.paciente_service.insere_relatorio_caso(
@@ -438,7 +437,6 @@ class SistemaSaude:
                     # Commit automático ao sair do with se não houver erro
                 
                 print(f"\nRelatório de caso cadastrado com sucesso!")
-                print(f"ID do relatório: {relatorio[0]}")
             
             # CASO 3: Pessoa já é paciente - apenas inserir relatório
             else:
@@ -453,7 +451,6 @@ class SistemaSaude:
                     # Commit automático ao sair do with se não houver erro
                 
                 print(f"\nRelatório de caso cadastrado com sucesso!")
-                print(f"ID do relatório: {relatorio[0]}")
                     
         except Exception as e:
             print(f"\nErro ao cadastrar relatório: {e}")
