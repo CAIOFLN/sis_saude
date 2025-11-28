@@ -24,9 +24,8 @@ SELECT P.id_pedido, R.nome, R.registro_ms, P.quantidade, (COALESCE(EXT.estoque_t
     FROM relatorio_recurso RR
     JOIN pedido P ON P.id_pedido = RR.id_pedido_relatorio
     JOIN turno T ON P.id_turno = T.id_turno 
-    JOIN entidade_saude ES ON ES.cnes = T.cnes_entidade_saude
     JOIN recurso R ON R.registro_ms = P.registro_ms_recurso 
-    LEFT JOIN possui PS ON PS.cnes_entidade_saude = ES.cnes AND PS.registro_ms_recurso = P.registro_ms_recurso -- Junção externa para não excluirmos hospitais que não possuem o recurso que estão pedindo.
+    LEFT JOIN possui PS ON PS.cnes_entidade_saude = T.cnes_entidade_saude AND PS.registro_ms_recurso = P.registro_ms_recurso -- Junção externa para não excluirmos hospitais que não possuem o recurso que estão pedindo.
     LEFT JOIN (
         SELECT SUM(PO.quantidade_disponivel) AS estoque_total, PO.registro_ms_recurso AS recurso
         FROM possui PO 
