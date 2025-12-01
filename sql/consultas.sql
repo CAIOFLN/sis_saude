@@ -59,7 +59,7 @@ SELECT H.* -- Selecionar todos os atributos de hospital
                 FROM ESPECIALIZACOES E1
             GROUP BY E1.ESPECIALIDADE
             ORDER BY COUNT(*) ASC
-            LIMIT 3);
+            LIMIT 3)
         -- Tradução: Seleção das 3 especialidades menos frequentes
     
         EXCEPT

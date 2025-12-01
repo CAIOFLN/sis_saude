@@ -49,7 +49,6 @@ VALUES ('0123456789012', 'Omeprazol 20mg', 'Medicamento', 15.00, 25.00);
 
 INSERT INTO recurso (registro_ms, nome, tipo, temp_min, temp_max)
 VALUES ('1122334455667', 'Losartana Potássica 50mg', 'Medicamento', 15.00, 30.00);
-COMMIT;
 
 -- ========================================
 -- PRODUÇÃO - Laboratórios produzem recursos (8 recursos)
@@ -59,6 +58,7 @@ COMMIT;
 INSERT INTO produz (cnes_laboratorio, registro_ms_recurso)
 VALUES 
     ('2751801', '1234567890123'),  -- Vacina COVID-19
+    ('2751801', '2345678901234'),
     ('2751801', '5678901234567'),  -- Insulina
     ('2751801', '6789012345678'),  -- Vacina Hepatite B
     ('2751801', '9012345678901');  -- Ibuprofeno

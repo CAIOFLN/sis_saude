@@ -18,10 +18,10 @@ psql -d postgres -U seu_usuario
 CREATE DATABASE sis_saude;
 ```
 
-#### 1.3. Conectar ao Banco Criado
+#### 1.3. Saia do psql
 
 ```sql
-\c sis_saude;
+\q
 ```
 
 
