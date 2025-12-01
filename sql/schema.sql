@@ -100,8 +100,8 @@ CREATE TABLE laboratorio (
 
 CREATE TABLE hospital (
     cnes_hospital        CHAR(7)   NOT NULL,
-    leitos_normais_disp  NUMERIC(4,0)  NOT NULL,
-    leitos_uti_disp      NUMERIC(4,0)  NOT NULL,
+    leitos_normais_disp  NUMERIC(4,0),
+    leitos_uti_disp      NUMERIC(4,0),
 
     CONSTRAINT pk_hospital PRIMARY KEY (cnes_hospital),
     CONSTRAINT fk_hospital_entidade_saude
