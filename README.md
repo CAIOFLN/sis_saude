@@ -100,19 +100,10 @@ sis_saude/
 
 - **Python** - Linguagem de programação principal
 - **PostgreSQL** - Sistema de gerenciamento de banco de dados
-- **psycopg2** - Adaptador PostgreSQL para Python
-- **python-dotenv** - Gerenciamento de variáveis de ambiente
+- **psycopg** - Adaptador PostgreSQL para Python
 
 ## 📝 Notas
 
 - Certifique-se de que o PostgreSQL está rodando antes de executar a aplicação
 - O arquivo `.env` não deve ser versionado no Git (adicione ao `.gitignore`)
 - Para consultas SQL úteis, verifique o arquivo `sql/consultas.sql`
-
-## 📄 Licença
-
-[Adicione aqui a licença do projeto]
-
-## 👥 Autores
-
-[Adicione aqui os autores do projeto]
