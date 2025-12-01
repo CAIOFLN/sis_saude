@@ -105,5 +105,4 @@ sis_saude/
 ## 📝 Notas
 
 - Certifique-se de que o PostgreSQL está rodando antes de executar a aplicação
-- O arquivo `.env` não deve ser versionado no Git (adicione ao `.gitignore`)
-- Para consultas SQL úteis, verifique o arquivo `sql/consultas.sql`
+- Para consultas SQL, verifique o arquivo `sql/consultas.sql`
