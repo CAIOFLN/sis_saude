@@ -233,9 +233,28 @@ SELECT
     ''
 FROM ped;
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 -- ========================================
--- DADOS CONSULTA 3: 
+-- DADOS CONSULTA 3: RECURSOS EM LABORATÓRIOS E HOSPITAIS
 -- ========================================
+-- Este arquivo cria um hospital e um laboratório e insere recursos de formas diferentes para testar a resposta
+-- ========================================
+
+-- Criamos um hospital e um laboratório 
 
 INSERT INTO entidade_saude (cnes, nome, tipo_entidade, cep, numero_endereco) VALUES
 ('3950217', 'Hospital Santa Validação', 'HOSPITAL', '12345678', '100'),
@@ -247,46 +266,87 @@ INSERT INTO hospital (cnes_hospital, leitos_normais_disp, leitos_uti_disp) VALUE
 INSERT INTO laboratorio (cnes_laboratorio) VALUES
 ('3950218');
 
+-- Precisamos inserir novos recursos
+
+-- ========================================
+-- -- CASO 1: PRODUZIDO PELO LAB, MAS HOSPITAL NÃO TEM REGISTRO
+-- -- DEVE APARECER POIS NÃO TEM ESTOQUE
+-- ========================================
 INSERT INTO recurso (registro_ms, nome, tipo, temp_min, temp_max)
 VALUES ('1000000000001', 'Amoxicilina 500mg', 'Medicamento', 15.00, 30.00);
 
+-- ========================================
+-- -- CASO 2: PRODUZIDO PELO LAB, HOSPITAL TEM REGISTRO MAS QTD=0
+-- -- DEVE APARECER POIS O ESTOQUE ESTÁ ZERADO
+-- ========================================
 INSERT INTO recurso (registro_ms, nome, tipo, temp_min, temp_max)
 VALUES ('1000000000002', 'Omeprazol 20mg', 'Medicamento', 15.00, 30.00);
 
+
+-- ========================================
+-- -- CASO 3: PRODUZIDO PELO LAB E HOSPITAL TEM ESTOQUE
+-- -- NÃO DEVE APARECER
+-- ========================================
 INSERT INTO recurso (registro_ms, nome, tipo, temp_min, temp_max)
 VALUES ('1000000000003', 'Simvastatina 20mg', 'Medicamento', 15.00, 30.00);
 
+-- ========================================
+-- -- CASO 4: NINGUÉM PRODUZ
+-- -- NÃO DEVE APARECER
+-- ========================================
 INSERT INTO recurso (registro_ms, nome, tipo, temp_min, temp_max)
 VALUES ('1000000000004', 'Clonazepam 2.5mg', 'Medicamento', 15.00, 30.00);
-
+-- ========================================
+-- -- CASO 5: PRODUZIDO, LAB TEM ESTOQUE, MAS HOSPITAL NÃO
+-- -- DEVE APARECER
+-- ========================================
 INSERT INTO recurso (registro_ms, nome, tipo, temp_min, temp_max)
 VALUES ('1000000000005', 'Metformina 850mg', 'Medicamento', 15.00, 30.00);
 
+-- Criamos a tabela produz pros nossos dados, conforme explicado pelos casos acima
+-- Laboratório produz todos, menos o Clonazepam (CASO 4)
 INSERT INTO produz (cnes_laboratorio, registro_ms_recurso) VALUES
-('3950218', '1000000000001'),
-('3950218', '1000000000002'),
+('3950218', '1000000000001'), 
+('3950218', '1000000000002'), 
 ('3950218', '1000000000003'), 
 ('3950218', '1000000000005'); 
 
--- ========================================
--- DEFINIR ESTOQUES (TABELA POSSUI)
--- ========================================
+-- Criamos o estoque da entidade de saúde com a tabela possui
 
+-- O Hospital tem Simvastatina em estoque (CASO 3)
 INSERT INTO possui (cnes_entidade_saude, registro_ms_recurso, quantidade_disponivel) VALUES
--- O Hospital tem Simvastatina em estoque 
 ('3950217', '1000000000003', 100),
--- O Hospital tem Omeprazol cadastrado, mas acabou (0) 
+
+-- O Hospital tem Omeprazol cadastrado, mas acabou (QTD=0) (CASO 2)
 ('3950217', '1000000000002', 0),
--- O Laboratório tem estoque de Metformina para fornecer, mas o hospital não tem nada 
+
+-- O Laboratório tem estoque de Metformina para fornecer, mas o hospital não tem nada, nem registro na tabela possui(CASO 5)
 ('3950218', '1000000000005', 500);
+
+-- A Amoxicilina não entra no 'possui, pois o hospital nunca recebeu(CASO 1)
+
+
+
+
+
+
+
+
+
+
 
 
 
 -- ========================================
 -- DADOS CONSULTA 4: HOSPITAIS COM AS 3 ESPECIALIDADES MENOS FREQUENTES
 -- ========================================
--- Este arquivo cria um cenário para testar a consulta que busca hospitais
--- que atendem TODAS as 3 especialidades menos frequentes
+-- As 3 menos frequentes sao Cardiologia, Pediatria,Ortopedia em que apenas os hospitais 2751501, 2751501, 2751501
+-- Criei esses hospitais para aumentar a frequencia das especialidades Reumatologia e Geriatria
+-- No fim a contegem ficou:
+-- Cardiologia, Pediatria, Ortopedia = 3
+-- Gereatria = 6
+-- Reumatologia = 7
+
 
 -- Criar 3 hospitais novos para teste
 INSERT INTO entidade_saude (cnes, nome, telefone, horario_funcionamento, cep, numero_endereco, tipo_entidade)
@@ -301,65 +361,15 @@ VALUES
     ('2751506', 60, 8),
     ('2751507', 100, 15);
 
--- Adicionar especialidades RARAS aos hospitais
--- Vamos usar: REUMATOLOGIA, ENDOCRINOLOGIA, GERIATRIA como as 3 menos frequentes
-
--- Hospital 2751501: Adicionar REUMATOLOGIA (será 1ª ocorrência - MENOS FREQUENTE #1)
-INSERT INTO especializacoes (cnes_hospital, especialidade)
-VALUES ('2751501', 'Reumatologia');
-
--- Hospital 2751502: Adicionar ENDOCRINOLOGIA (será 1ª ocorrência - MENOS FREQUENTE #2)
-INSERT INTO especializacoes (cnes_hospital, especialidade)
-VALUES ('2751502', 'Endocrinologia');
-
--- Hospital 2751503: Adicionar GERIATRIA (será 1ª ocorrência - MENOS FREQUENTE #3)
-INSERT INTO especializacoes (cnes_hospital, especialidade)
-VALUES ('2751503', 'Geriatria');
-
--- Hospital 2751505 (NOVO): TEM todas as 3 especialidades menos frequentes ✓
 INSERT INTO especializacoes (cnes_hospital, especialidade)
 VALUES 
-    ('2751505', 'Reumatologia'),     -- Rara (2ª ocorrência)
-    ('2751505', 'Endocrinologia'),   -- Rara (2ª ocorrência)
-    ('2751505', 'Geriatria'),        -- Rara (2ª ocorrência)
-    ('2751505', 'Cardiologia'),      -- Comum
-    ('2751505', 'Pediatria');        -- Comum
+    ('2751505', 'Reumatologia');
 
--- Hospital 2751506 (NOVO): Tem apenas 2 das 3 especialidades menos frequentes ✗
--- Tem REUMATOLOGIA e ENDOCRINOLOGIA, mas falta GERIATRIA
 INSERT INTO especializacoes (cnes_hospital, especialidade)
 VALUES 
-    ('2751506', 'Reumatologia'),     -- Rara (3ª ocorrência)
-    ('2751506', 'Endocrinologia'),   -- Rara (3ª ocorrência)
-    ('2751506', 'Cardiologia'),      -- Comum
-    ('2751506', 'Ortopedia');        -- Comum
+    ('2751506', 'Reumatologia');
 
--- Hospital 2751507 (NOVO): TEM todas as 3 especialidades menos frequentes ✓
 INSERT INTO especializacoes (cnes_hospital, especialidade)
 VALUES 
-    ('2751507', 'Reumatologia'),     -- Rara (4ª ocorrência)
-    ('2751507', 'Endocrinologia'),   -- Rara (4ª ocorrência)
-    ('2751507', 'Geriatria'),        -- Rara (3ª ocorrência)
-    ('2751507', 'Neurologia'),       -- Comum
-    ('2751507', 'Pediatria');        -- Comum
+    ('2751507', 'Geriatria');
 
--- ========================================
--- FREQUÊNCIAS FINAIS:
--- ========================================
--- GERIATRIA: 3 ocorrências (2751503, 2751505, 2751507) - MENOS FREQUENTE #1
--- REUMATOLOGIA: 4 ocorrências (2751501, 2751505, 2751506, 2751507) - MENOS FREQUENTE #2
--- ENDOCRINOLOGIA: 4 ocorrências (2751502, 2751505, 2751506, 2751507) - MENOS FREQUENTE #3
--- Neonatologia: 1 ocorrência (2751504) 
--- Traumatologia: 1 ocorrência (2751502)
--- Cirurgia Geral: 1 ocorrência (2751503)
--- Ginecologia: 1 ocorrência (2751503)
--- Oncologia: 1 ocorrência (2751502)
--- Neurologia: 2 ocorrências (2751502, 2751507)
--- Obstetrícia: 2 ocorrências (2751503, 2751504)
--- Ortopedia: 3 ocorrências (2751501, 2751506)
--- Pediatria: 4 ocorrências (2751501, 2751504, 2751505, 2751507)
--- Cardiologia: 5 ocorrências (2751501, 2751502, 2751503, 2751505, 2751506)
--- ========================================
--- ATENÇÃO: A consulta usa ORDER BY COUNT(*) ASC e LIMIT 3
--- Então as 3 menos frequentes serão as 3 primeiras em ordem crescente
--- =======================================

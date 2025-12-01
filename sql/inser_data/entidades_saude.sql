@@ -38,14 +38,22 @@ VALUES
     ('2751501', 'Cardiologia'),
     ('2751501', 'Pediatria'),
     ('2751501', 'Ortopedia'),
+    ('2751501', 'Geriatria'),
+    ('2751501', 'Reumatologia'),
+
+
     ('2751502', 'Cardiologia'),
-    ('2751502', 'Neurologia'),
-    ('2751502', 'Oncologia'),
-    ('2751502', 'Traumatologia'),
-    ('2751503', 'Ginecologia'),
-    ('2751503', 'Obstetrícia'),
+    ('2751502', 'Pediatria'),
+    ('2751502', 'Ortopedia'),
+    ('2751502', 'Geriatria'),
+    ('2751502', 'Reumatologia'),
+
+
     ('2751503', 'Cardiologia'),
-    ('2751503', 'Cirurgia Geral'),
-    ('2751504', 'Obstetrícia'),
-    ('2751504', 'Pediatria'),
-    ('2751504', 'Neonatologia');
+    ('2751503', 'Pediatria'),
+    ('2751503', 'Ortopedia'),
+    ('2751503', 'Geriatria'),
+    ('2751503', 'Reumatologia'),
+
+    ('2751504', 'Geriatria'),
+    ('2751504', 'Reumatologia');

@@ -3,7 +3,7 @@
 -- Quando o hospital nao ter o recurso (NULL) essa funcao coloca 0 no lugar "COALESCE(p.quantidade_disponivel, 0)"
 SELECT h.cnes_hospital, r.registro_ms, r.nome, COALESCE(p.quantidade_disponivel, 0) AS qtd_hospital, media.avg_estoque, media.maior_estoque, media.menor_estoque
 FROM hospital h 
-CROSS JOIN recurso r -- produto cartesiano para considerar todo os produtos possiveis
+CROSS JOIN recurso r -- produto cartesiano para considerar todo os recursos + hospitais possiveis
 LEFT JOIN possui p ON (p.cnes_entidade_saude = h.cnes_hospital AND p.registro_ms_recurso = r.registro_ms)
 JOIN ( -- podemos fazer join pois devido ao CROSS JOIN ja temos todas as combinacoes possivel
     SELECT r2.registro_ms, AVG(COALESCE(p2.quantidade_disponivel, 0)) as avg_estoque, MIN(COALESCE(p2.quantidade_disponivel, 0)) as menor_estoque,
@@ -52,6 +52,7 @@ WHERE RecursosComEstoqueEmHospital.registro_ms_recurso IS NULL;
 
 -- Consulta 4.
 -- Selecionar quais hospitais atendem todas as 3 especialidades menos frequentes
+-- No caso de teste, as 3 menos frequentes foram Cardiologia, Pediatria e Ortopedia
 SELECT H.* -- Selecionar todos os atributos de hospital
     FROM HOSPITAL H 
         WHERE NOT EXISTS ( -- Se Not Exists for vazio, então atende a condição where e é retornado
