@@ -50,11 +50,11 @@ FROM pessoa WHERE cpf = '12452364335';
 
 -- Médico Henrique (CPF: 23565323453) - Plantão 24h Sábado e Domingo
 INSERT INTO escala (id_trabalhador_es, dia_da_semana, hora_entrada, hora_saida)
-SELECT id_pessoa, 'sabado', '08:00:00', '08:00:00'
+SELECT id_pessoa, 'sabado', '08:00:00', '10:00:00'
 FROM pessoa WHERE cpf = '23565323453';
 
 INSERT INTO escala (id_trabalhador_es, dia_da_semana, hora_entrada, hora_saida)
-SELECT id_pessoa, 'domingo', '08:00:00', '08:00:00'
+SELECT id_pessoa, 'domingo', '08:00:00', '10:00:00'
 FROM pessoa WHERE cpf = '23565323453';
 
 -- Enfermeira Maria Clara (CPF: 34567891234) - Segunda a Sexta manhã
